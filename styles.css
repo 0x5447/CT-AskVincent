@@ -116,9 +116,9 @@ body {
     font-size: 1.2rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    background: #007bff;
+    background: #000;
     color: white;
-    border: none;
+    border: 2px solid #ff6600;
     padding: 15px 35px;
     border-radius: 10px;
     cursor: pointer;
