@@ -1,5 +1,42 @@
+// script.js
+
 // ======================
-// CHAT FUNCTIONS (FIXED STREAMING VERSION)
+// CONFIGURATION (ORIGINAL)
+// ======================
+const WORKER_URL = 'https://venice-chatbot.graham-business-ventures.workers.dev';
+const BACKGROUND_IMAGES = [
+    'https://raw.githubusercontent.com/TGrahamGit/venice-mso/main/VeniceAI_Vf7NGoK.webp',
+    'https://raw.githubusercontent.com/TGrahamGit/venice-mso/main/VeniceAI_jXw0mwJ.webp',
+    'https://raw.githubusercontent.com/TGrahamGit/venice-mso/main/VeniceAI_sFkAxgA.webp'
+];
+
+// ======================
+// DOM ELEMENTS (ORIGINAL)
+// ======================
+const chatbox = document.getElementById('chatbox');
+const input = document.getElementById('input');
+const aibutton = document.getElementById('aibutton');
+let bgIndex = 0;
+
+// ======================
+// BACKGROUND SYSTEM (ORIGINAL)
+// ======================
+// Preload images for smooth rotation
+BACKGROUND_IMAGES.forEach(url => {
+    new Image().src = url;
+});
+
+function rotateBackground() {
+    document.body.style.backgroundImage = `url(${BACKGROUND_IMAGES[bgIndex]})`;
+    bgIndex = (bgIndex + 1) % BACKGROUND_IMAGES.length;
+}
+
+// Initial rotation and interval
+rotateBackground();
+setInterval(rotateBackground, 30000);
+
+// ======================
+// CHAT FUNCTIONS (UPDATED STREAMING VERSION)
 // ======================
 async function sendMessage() {
     const userMessage = input.value.trim();
@@ -20,7 +57,7 @@ async function sendMessage() {
             throw new Error(errorData.error || `HTTP Error: ${response.status}`);
         }
 
-        // Check if response is a stream
+        // Verify stream content type
         const contentType = response.headers.get('content-type') || '';
         if (!contentType.includes('text/event-stream')) {
             throw new Error('Unexpected response format from server');
@@ -31,7 +68,6 @@ async function sendMessage() {
         let buffer = '';
         let accumulatedContent = '';
 
-        // Process the stream
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
@@ -44,20 +80,18 @@ async function sendMessage() {
                 const event = buffer.slice(0, splitIndex);
                 buffer = buffer.slice(splitIndex + 2);
 
-                // Extract data from event
                 const dataLine = event.split('\n').find(line => line.startsWith('data:'));
                 if (!dataLine) continue;
 
                 try {
-                    const data = JSON.parse(dataLine.slice(5)); // Remove 'data:' prefix
+                    const data = JSON.parse(dataLine.slice(5));
                     
-                    // Handle actual content
                     if (data.choices?.[0]?.delta?.content) {
                         accumulatedContent += data.choices[0].delta.content;
                         updateMessage(loadingMessage, accumulatedContent);
                     }
                     
-                    // Remove loading state when first content arrives
+                    // Remove loading dots when content starts arriving
                     if (accumulatedContent && loadingMessage.querySelector('.loading-dots')) {
                         loadingMessage.querySelector('.loading-dots').remove();
                     }
@@ -67,7 +101,6 @@ async function sendMessage() {
             }
         }
 
-        // Final update to ensure complete rendering
         updateMessage(loadingMessage, accumulatedContent || '⚠️ Received empty response');
 
     } catch (error) {
@@ -78,3 +111,41 @@ async function sendMessage() {
         input.focus();
     }
 }
+
+// ======================
+// HELPER FUNCTIONS (ORIGINAL)
+// ======================
+function addMessage(sender, text, isHTML = false) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}`;
+    isHTML ? messageDiv.innerHTML = text : messageDiv.textContent = text;
+    chatbox.appendChild(messageDiv);
+    scrollToNewMessage(messageDiv);
+    return messageDiv;
+}
+
+function updateMessage(messageElement, newText) {
+    messageElement.innerHTML = newText;
+    messageElement.classList.remove('loading');
+    scrollToNewMessage(messageElement);
+}
+
+function scrollToNewMessage(element) {
+    element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'start'
+    });
+}
+
+// ======================
+// EVENT LISTENERS (ORIGINAL)
+// ======================
+input.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+});
+
+input.focus();
