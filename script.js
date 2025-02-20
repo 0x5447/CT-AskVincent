@@ -3,11 +3,11 @@
 // ======================
 // CONFIGURATION
 // ======================
-const WORKER_URL = 'venice-chatbot.graham-business-ventures.workers.dev';
+const WORKER_URL = 'https://venice-chatbot.graham-business-ventures.workers.dev'; // Added https://
 const BACKGROUND_IMAGES = [
-    'https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/VeniceAI_Vf7NGoK.webp',
-    'https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/VeniceAI_jXw0mwJ.webp',
-    'https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/VeniceAI_sFkAxgA.webp'
+    'https://raw.githubusercontent.com/TGrahamGit/venice-mso/main/VeniceAI_Vf7NGoK.webp', // Removed /refs/heads
+    'https://raw.githubusercontent.com/TGrahamGit/venice-mso/main/VeniceAI_jXw0mwJ.webp',
+    'https://raw.githubusercontent.com/TGrahamGit/venice-mso/main/VeniceAI_sFkAxgA.webp'
 ];
 // ======================
 
