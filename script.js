@@ -27,8 +27,6 @@ BACKGROUND_IMAGES.forEach(url => {
 
 function rotateBackground() {
     document.body.style.backgroundImage = `url(${BACKGROUND_IMAGES[bgIndex]})`;
-    document.body.style.backgroundSize = 'cover';
-    document.body.style.backgroundPosition = 'center';
     bgIndex = (bgIndex + 1) % BACKGROUND_IMAGES.length;
 }
 
@@ -62,6 +60,7 @@ async function sendMessage() {
         console.error('Chat error:', error);
     } finally {
         aibutton.disabled = false;
+        input.focus();
     }
 }
 
@@ -71,14 +70,22 @@ function addMessage(sender, text, isHTML = false) {
     messageDiv.className = `message ${sender}`;
     isHTML ? messageDiv.innerHTML = text : messageDiv.textContent = text;
     chatbox.appendChild(messageDiv);
-    chatbox.scrollTop = chatbox.scrollHeight;
+    scrollToNewMessage(messageDiv);
     return messageDiv;
 }
 
 function updateMessage(messageElement, newText) {
     messageElement.innerHTML = newText;
     messageElement.classList.remove('loading');
-    chatbox.scrollTop = chatbox.scrollHeight;
+    scrollToNewMessage(messageElement);
+}
+
+function scrollToNewMessage(element) {
+    element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'start'
+    });
 }
 
 // Event listeners
@@ -89,23 +96,5 @@ input.addEventListener('keypress', (e) => {
     }
 });
 
-// Add this to your script.js
-function scrollToNewMessage() {
-    const chatBody = document.getElementById('chatbox');
-    const lastMessage = chatBody.lastElementChild;
-    
-    if (lastMessage) {
-        // Scroll to top of new message
-        lastMessage.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-        });
-    }
-}
-
-// Call this after adding new AI messages
-function sendMessage() {
-    // Your existing code
-    // ...
-    scrollToNewMessage();
-}
+// Initial focus on input
+input.focus();
