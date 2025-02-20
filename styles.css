@@ -1,9 +1,17 @@
-/* Updated CSS with Mobile Responsiveness */
 /* Base Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
 body {
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
-    margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -51,6 +59,10 @@ body {
     letter-spacing: 0.5px;
 }
 
+.chat-header p {
+    line-height: 1.4;
+}
+
 /* Messages */
 .chat-body {
     height: 500px;
@@ -59,6 +71,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    overflow-anchor: auto;
+    scroll-behavior: smooth;
 }
 
 .message {
@@ -70,6 +84,22 @@ body {
     line-height: 1.4;
     text-align: justify;
     word-break: break-word;
+}
+
+.user {
+    background: #000;
+    color: white;
+    margin-left: auto;
+    font-family: 'Inter', sans-serif;
+}
+
+.bot {
+    background: #f1f3f6;
+    border: 1px solid #ff6600;
+    color: #2d3748;
+    margin-right: auto;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
 }
 
 /* Input Area */
@@ -84,33 +114,72 @@ body {
 #input {
     flex: 1;
     padding: 0.8rem;
+    background: rgba(255,255,255,0.9);
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
     font-size: 1rem;
+    font-weight: 500;
+    transition: border-color 0.3s ease;
+    min-width: 50px;
+}
+
+#input:focus {
+    outline: none;
+    border-color: #ff6600;
+    box-shadow: 0 0 0 2px rgba(255,102,0,0.25);
 }
 
 #aibutton {
+    font-family: 'Oswald', sans-serif;
     font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: #000;
+    color: white;
+    border: 2px solid #ff6600;
     padding: 0.8rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 8px;
+}
+
+#aibutton:hover {
+    background: white;
+    color: #ff6600;
+    transform: translateY(-1px);
+}
+
+#aibutton:active {
+    transform: translateY(0);
 }
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
+    body {
+        align-items: flex-start;
+        padding: 10px 0;
+    }
+
     .chat-container {
-        margin: 10px;
+        margin: 10px 0;
         width: 100%;
+        max-height: 100vh;
         border-radius: 0;
+        box-shadow: none;
     }
 
     .chat-header {
-        padding: 1rem;
+        padding: 1rem 15px;
     }
 
     .chat-header h2 {
-        font-size: 1.5em;
+        font-size: 1.5rem;
     }
 
     .chat-body {
-        height: calc(100vh - 280px);
-        padding: 1rem;
+        height: calc(100vh - 240px);
+        padding: 15px;
     }
 
     .message {
@@ -120,6 +189,8 @@ body {
     }
 
     .chat-footer {
+        position: sticky;
+        bottom: 0;
         flex-direction: column;
         gap: 10px;
         padding: 1rem;
@@ -133,13 +204,34 @@ body {
 
     #input {
         font-size: 0.95rem;
-        padding: 0.8rem;
     }
 }
 
 @media (max-width: 480px) {
+    body {
+        display: block;
+        padding: 0;
+    }
+
+    .chat-container {
+        max-height: 100vh;
+        margin: 0;
+        border: none;
+    }
+
+    .chat-header h2 {
+        font-size: 1.3rem;
+        margin-bottom: 0.3rem;
+    }
+
     .chat-header p {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
+        line-height: 1.3;
+    }
+
+    .chat-body {
+        height: calc(100vh - 180px);
+        padding: 10px;
     }
 
     .message {
