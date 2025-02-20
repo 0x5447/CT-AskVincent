@@ -26,17 +26,18 @@ body {
     width: 95%;
     max-width: 800px;
     background: rgba(255, 255, 255, 0.85);
-    border-radius: 20px;
+    border: 2px solid #ff6600;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     backdrop-filter: blur(10px);
     position: relative;
     z-index: 1;
+    margin: 20px;
 }
 
 /* Header */
 .chat-header {
-    background: linear-gradient(135deg, #007bff, #3f51b5);
+    background: #000;
     color: white;
     padding: 25px;
     text-align: center;
@@ -54,10 +55,13 @@ body {
     height: 500px;
     padding: 25px;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
 .message {
-    margin: 15px 0;
+    margin: 0;
     padding: 15px 25px;
     border-radius: 25px;
     max-width: 75%;
@@ -89,19 +93,26 @@ body {
     border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-input {
+#input {
     flex: 1;
     padding: 15px;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     font-family: 'Inter', sans-serif;
-    font-size: 18px;
+    font-size: 1rem;
     font-weight: 500;
+    transition: border-color 0.3s ease;
 }
 
-aibutton {
+#input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+#aibutton {
     font-family: 'Oswald', sans-serif;
-    font-size: 24px;
+    font-size: 1.2rem;
     text-transform: uppercase;
     letter-spacing: 1px;
     background: #007bff;
@@ -113,21 +124,10 @@ aibutton {
     transition: all 0.3s;
 }
 
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+#aibutton:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
 }
 
-.loading-dots::after {
-    content: '...';
-    display: inline-block;
-    animation: dots 1s steps(4) infinite;
-}
-
-@keyframes dots {
-    0%, 25% { content: ''; }
-    50% { content: '.'; }
-    75% { content: '..'; }
-    100% { content: '...'; }
-}
+#aibutton:active {
+    transform: translateY(
