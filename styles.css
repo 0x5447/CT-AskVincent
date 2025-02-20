@@ -62,11 +62,12 @@ body {
 
 .message {
     margin: 0;
-    padding: 15px 25px;
-    border-radius: 25px;
+    padding: 15px 15px;
+    border-radius: 10px;
     max-width: 75%;
     animation: fadeIn 0.3s ease;
     line-height: 1.4;
+    text-align: justify;
 }
 
 .user {
