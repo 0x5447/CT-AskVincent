@@ -3,9 +3,9 @@
 // ======================
 // CONFIGURATION
 // ======================
-const WORKER_URL = 'https://venice-chatbot.graham-business-ventures.workers.dev'; // Added https://
+const WORKER_URL = 'https://venice-chatbot.graham-business-ventures.workers.dev';
 const BACKGROUND_IMAGES = [
-    'https://raw.githubusercontent.com/TGrahamGit/venice-mso/main/VeniceAI_Vf7NGoK.webp', // Removed /refs/heads
+    'https://raw.githubusercontent.com/TGrahamGit/venice-mso/main/VeniceAI_Vf7NGoK.webp',
     'https://raw.githubusercontent.com/TGrahamGit/venice-mso/main/VeniceAI_jXw0mwJ.webp',
     'https://raw.githubusercontent.com/TGrahamGit/venice-mso/main/VeniceAI_sFkAxgA.webp'
 ];
@@ -18,10 +18,17 @@ const aibutton = document.getElementById('aibutton');
 let bgIndex = 0;
 
 // ======================
-// BACKGROUND ROTATION
+// BACKGROUND SYSTEM
 // ======================
+// Preload images for smooth rotation
+BACKGROUND_IMAGES.forEach(url => {
+    new Image().src = url;
+});
+
 function rotateBackground() {
     document.body.style.backgroundImage = `url(${BACKGROUND_IMAGES[bgIndex]})`;
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
     bgIndex = (bgIndex + 1) % BACKGROUND_IMAGES.length;
 }
 
