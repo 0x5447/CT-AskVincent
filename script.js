@@ -25,7 +25,7 @@ function rotateBackground() {
     bgIndex = (bgIndex + 1) % BACKGROUND_IMAGES.length;
 }
 
-// Rotate background every 30 seconds
+// Initial rotation and interval
 rotateBackground();
 setInterval(rotateBackground, 30000);
 
@@ -36,28 +36,20 @@ async function sendMessage() {
     const userMessage = input.value.trim();
     if (!userMessage) return;
 
-    // Add user message
     addMessage('user', userMessage);
     input.value = '';
     aibutton.disabled = true;
 
-    // Add loading state
     const loadingMessage = addMessage('bot', '<span class="loading-dots"></span>', true);
 
     try {
         const response = await fetch(`${WORKER_URL}?query=${encodeURIComponent(userMessage)}`);
         const data = await response.json();
 
-        if (!response.ok) {
-            throw new Error(data.error || `Error: ${response.status}`);
-        }
-
-        if (!data?.choices?.[0]?.message?.content) {
-            throw new Error('Unexpected response format');
-        }
+        if (!response.ok) throw new Error(data.error || `HTTP Error: ${response.status}`);
+        if (!data?.choices?.[0]?.message?.content) throw new Error('Invalid response format');
 
         updateMessage(loadingMessage, data.choices[0].message.content);
-
     } catch (error) {
         updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
         console.error('Chat error:', error);
@@ -66,16 +58,11 @@ async function sendMessage() {
     }
 }
 
+// Helper functions
 function addMessage(sender, text, isHTML = false) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${sender}`;
-    
-    if (isHTML) {
-        messageDiv.innerHTML = text;
-    } else {
-        messageDiv.textContent = text;
-    }
-
+    isHTML ? messageDiv.innerHTML = text : messageDiv.textContent = text;
     chatbox.appendChild(messageDiv);
     chatbox.scrollTop = chatbox.scrollHeight;
     return messageDiv;
@@ -87,9 +74,7 @@ function updateMessage(messageElement, newText) {
     chatbox.scrollTop = chatbox.scrollHeight;
 }
 
-// ======================
-// EVENT LISTENERS
-// ======================
+// Event listeners
 input.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
