@@ -5,9 +5,9 @@
 // ======================
 const WORKER_URL = 'venice-chatbot.graham-business-ventures.workers.dev';
 const BACKGROUND_IMAGES = [
-    'https://github.com/TGrahamGit/venice-mso/blob/main/VeniceAI_Vf7NGoK.webp',
-    'https://github.com/TGrahamGit/venice-mso/blob/main/VeniceAI_jXw0mwJ.webp',
-    'https://github.com/TGrahamGit/venice-mso/blob/main/VeniceAI_sFkAxgA.webp'
+    'https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/VeniceAI_Vf7NGoK.webp',
+    'https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/VeniceAI_jXw0mwJ.webp',
+    'https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/VeniceAI_sFkAxgA.webp'
 ];
 // ======================
 
