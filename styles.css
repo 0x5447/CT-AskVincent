@@ -1,4 +1,5 @@
-/* Background & Base Styles */
+/* Updated CSS with Mobile Responsiveness */
+/* Base Styles */
 body {
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
@@ -39,13 +40,13 @@ body {
 .chat-header {
     background: #000;
     color: white;
-    padding: 25px;
+    padding: 1.5rem;
     text-align: center;
 }
 
 .chat-header h2 {
     font-family: 'Oswald', sans-serif;
-    margin: 0 0 8px 0;
+    margin: 0 0 0.5rem 0;
     font-size: 1.8em;
     letter-spacing: 0.5px;
 }
@@ -53,7 +54,7 @@ body {
 /* Messages */
 .chat-body {
     height: 500px;
-    padding: 25px;
+    padding: 1.5rem;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -62,33 +63,18 @@ body {
 
 .message {
     margin: 0;
-    padding: 15px 15px;
+    padding: 1rem;
     border-radius: 10px;
-    max-width: 75%;
+    max-width: 85%;
     animation: fadeIn 0.3s ease;
     line-height: 1.4;
     text-align: justify;
-}
-
-.user {
-    background: #000;
-    color: white;
-    margin-left: auto;
-    font-family: 'Inter', sans-serif;
-}
-
-.bot {
-    background: #f1f3f6;
-    border: 1px solid #ff6600;
-    color: #2d3748;
-    margin-right: auto;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 600;
+    word-break: break-word;
 }
 
 /* Input Area */
 .chat-footer {
-    padding: 20px;
+    padding: 1rem;
     background: rgba(0,0,0,0.9);
     display: flex;
     gap: 15px;
@@ -97,39 +83,73 @@ body {
 
 #input {
     flex: 1;
-    padding: 15px;
-    background: rgba(255,255,255,0.9);
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    font-family: 'Inter', sans-serif;
+    padding: 0.8rem;
     font-size: 1rem;
-    font-weight: 500;
-    transition: border-color 0.3s ease;
-}
-
-#input:focus {
-    outline: none;
-    border-color: #ff6600;
-    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
 }
 
 #aibutton {
-    font-family: 'Oswald', sans-serif;
-    font-size: 1.4rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    background: #000;
-    color: white;
-    border: 2px solid #ff6600;
-    padding: 15px 35px;
-    cursor: pointer;
-    transition: all 0.3s;
+    font-size: 1.2rem;
+    padding: 0.8rem 1.5rem;
 }
 
-#aibutton:hover {
-    background: white;
-    color: #ff6600;
-    transform: translateY(-1px);
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .chat-container {
+        margin: 10px;
+        width: 100%;
+        border-radius: 0;
+    }
+
+    .chat-header {
+        padding: 1rem;
+    }
+
+    .chat-header h2 {
+        font-size: 1.5em;
+    }
+
+    .chat-body {
+        height: calc(100vh - 280px);
+        padding: 1rem;
+    }
+
+    .message {
+        max-width: 90%;
+        padding: 0.8rem;
+        font-size: 0.95rem;
+    }
+
+    .chat-footer {
+        flex-direction: column;
+        gap: 10px;
+        padding: 1rem;
+    }
+
+    #aibutton {
+        width: 100%;
+        font-size: 1.1rem;
+        padding: 0.8rem;
+    }
+
+    #input {
+        font-size: 0.95rem;
+        padding: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-header p {
+        font-size: 0.9rem;
+    }
+
+    .message {
+        max-width: 95%;
+        border-radius: 8px;
+    }
+
+    #aibutton {
+        font-size: 1rem;
+    }
 }
 
 /* Animations */
