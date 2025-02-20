@@ -1,41 +1,9 @@
 // script.js
 
-// ======================
-// CONFIGURATION
-// ======================
-const WORKER_URL = 'https://venice-chatbot.graham-business-ventures.workers.dev';
-const BACKGROUND_IMAGES = [
-    'https://raw.githubusercontent.com/TGrahamGit/venice-mso/main/VeniceAI_Vf7NGoK.webp',
-    'https://raw.githubusercontent.com/TGrahamGit/venice-mso/main/VeniceAI_jXw0mwJ.webp',
-    'https://raw.githubusercontent.com/TGrahamGit/venice-mso/main/VeniceAI_sFkAxgA.webp'
-];
-// ======================
-
-// DOM Elements
-const chatbox = document.getElementById('chatbox');
-const input = document.getElementById('input');
-const aibutton = document.getElementById('aibutton');
-let bgIndex = 0;
+// ... (keep configuration and background system code the same) ...
 
 // ======================
-// BACKGROUND SYSTEM
-// ======================
-// Preload images for smooth rotation
-BACKGROUND_IMAGES.forEach(url => {
-    new Image().src = url;
-});
-
-function rotateBackground() {
-    document.body.style.backgroundImage = `url(${BACKGROUND_IMAGES[bgIndex]})`;
-    bgIndex = (bgIndex + 1) % BACKGROUND_IMAGES.length;
-}
-
-// Initial rotation and interval
-rotateBackground();
-setInterval(rotateBackground, 30000);
-
-// ======================
-// CHAT FUNCTIONS
+// CHAT FUNCTIONS (UPDATED FOR STREAMING)
 // ======================
 async function sendMessage() {
     const userMessage = input.value.trim();
@@ -49,52 +17,28 @@ async function sendMessage() {
 
     try {
         const response = await fetch(`${WORKER_URL}?query=${encodeURIComponent(userMessage)}`);
-        const data = await response.json();
+        
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(error);
+        }
 
-        if (!response.ok) throw new Error(data.error || `HTTP Error: ${response.status}`);
-        if (!data?.choices?.[0]?.message?.content) throw new Error('Invalid response format');
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let accumulatedContent = '';
 
-        updateMessage(loadingMessage, data.choices[0].message.content);
-    } catch (error) {
-        updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
-        console.error('Chat error:', error);
-    } finally {
-        aibutton.disabled = false;
-        input.focus();
-    }
-}
+        // Remove loading dots when first content arrives
+        let hasReceivedContent = false;
 
-// Helper functions
-function addMessage(sender, text, isHTML = false) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${sender}`;
-    isHTML ? messageDiv.innerHTML = text : messageDiv.textContent = text;
-    chatbox.appendChild(messageDiv);
-    scrollToNewMessage(messageDiv);
-    return messageDiv;
-}
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
 
-function updateMessage(messageElement, newText) {
-    messageElement.innerHTML = newText;
-    messageElement.classList.remove('loading');
-    scrollToNewMessage(messageElement);
-}
-
-function scrollToNewMessage(element) {
-    element.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'start'
-    });
-}
-
-// Event listeners
-input.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-    }
-});
-
-// Initial focus on input
-input.focus();
+            buffer += decoder.decode(value, { stream: true });
+            
+            // Process complete SSE events (separated by \n\n)
+            while (buffer.includes('\n\n')) {
+                const splitIndex = buffer.indexOf('\n\n');
+                const event = buffer.slice(0, splitIndex);
+                buffer
