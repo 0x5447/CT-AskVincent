@@ -75,6 +75,20 @@ body {
     scroll-behavior: smooth;
 }
 
+/* Scrollbar Styling */
+.chat-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-body::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.05);
+}
+
+.chat-body::-webkit-scrollbar-thumb {
+    background: #ff6600;
+    border-radius: 4px;
+}
+
 .message {
     margin: 0;
     padding: 1rem;
@@ -164,7 +178,7 @@ body {
     .chat-container {
         margin: 10px 0;
         width: 100%;
-        max-height: 100vh;
+        max-height: 100dvh;
         border-radius: 0;
         box-shadow: none;
     }
@@ -178,8 +192,9 @@ body {
     }
 
     .chat-body {
-        height: calc(100vh - 240px);
+        height: calc(100dvh - 240px);
         padding: 15px;
+        -webkit-overflow-scrolling: touch;
     }
 
     .message {
@@ -214,7 +229,7 @@ body {
     }
 
     .chat-container {
-        max-height: 100vh;
+        max-height: 100dvh;
         margin: 0;
         border: none;
     }
@@ -230,7 +245,7 @@ body {
     }
 
     .chat-body {
-        height: calc(100vh - 180px);
+        height: calc(100dvh - 180px);
         padding: 10px;
     }
 
