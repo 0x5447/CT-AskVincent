@@ -126,9 +126,7 @@ body {
 }
 
 #aibutton:hover {
-    background: #0056b3;
+    background: white;
+    color: #ff6600;
     transform: translateY(-1px);
 }
-
-#aibutton:active {
-    transform: translateY(
