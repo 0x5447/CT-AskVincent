@@ -270,13 +270,11 @@ body {
 
 .loading-dots::after {
     content: '...';
-    display: inline-block;
-    animation: dots 1s steps(4) infinite;
+    animation: dots 1s infinite steps(3, end);
 }
 
 @keyframes dots {
-    0%, 25% { content: ''; }
-    50% { content: '.'; }
-    75% { content: '..'; }
-    100% { content: '...'; }
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
 }
