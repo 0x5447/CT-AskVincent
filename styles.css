@@ -268,12 +268,17 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-.loading-dots::after {
-    content: '...';
-    animation: dots 1s infinite steps(3, end);
+.loading-dots {
+    display: inline-block;
+    min-width: 2em;
 }
 
-@keyframes dots {
+.loading-dots::after {
+    content: '...';
+    animation: dotAnimation 1.5s infinite;
+}
+
+@keyframes dotAnimation {
     0%, 20% { content: '.'; }
     40% { content: '..'; }
     60%, 100% { content: '...'; }
