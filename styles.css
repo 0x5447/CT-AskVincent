@@ -70,7 +70,7 @@ body {
 }
 
 .user {
-    background: #007bff;
+    background: #000;
     color: white;
     margin-left: auto;
     font-family: 'Inter', sans-serif;
@@ -107,7 +107,7 @@ body {
 
 #input:focus {
     outline: none;
-    border-color: #007bff;
+    border-color: #ff6600;
     box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
 }
 
