@@ -1,53 +1,64 @@
-// script.js
+// ======================
+// CONFIGURATION
+// ======================
+const WORKER_URL = 'https://venice-chatbot.graham-business-ventures.workers.dev/'; // Your Cloudflare Worker URL
 
-// ===========================================
-// Configuration - Replace these with your details!
-// ===========================================
-const workerUrl = 'https://venice-chatbot.graham-business-ventures.workers.dev/'; // <-- YOUR WORKER URL HERE
-// ===========================================
-
-// Get HTML elements
+// ======================
+// ELEMENTS
+// ======================
 const chatbox = document.getElementById('chatbox');
 const input = document.getElementById('input');
 
+// ======================
+// FUNCTIONS
+// ======================
 async function sendMessage() {
-  // Get user's message and clear input
   const userMessage = input.value.trim();
   if (!userMessage) return;
 
-  // Add user message to chat
+  // Add user message
   addMessage('user', userMessage);
   input.value = '';
+  
+  // Add loading indicator
+  const loadingMessage = addMessage('bot', '<span class="loading-dots"></span>', true);
 
   try {
-    // Send request to Cloudflare Worker
-    const response = await fetch(`${workerUrl}?query=${encodeURIComponent(userMessage)}`);
+    const response = await fetch(`${WORKER_URL}?query=${encodeURIComponent(userMessage)}`);
     
-    // Handle HTTP errors
     if (!response.ok) {
-      throw new Error(`Bot failed to respond (HTTP ${response.status})`);
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
 
-    // Parse JSON response
     const data = await response.json();
-    
-    // Add bot response to chat
-    addMessage('bot', data.choices[0].message.content);
-
+    updateMessage(loadingMessage, data.choices[0].message.content);
   } catch (error) {
-    // Show error message in chat
-    addMessage('bot', `Error: ${error.message}`);
-    console.error('Chat error:', error);
+    updateMessage(loadingMessage, `Oops! There was an error: ${error.message}`);
+  }
+}
+
+function addMessage(sender, text, isHTML = false) {
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `message ${sender}`;
+  
+  if (isHTML) {
+    messageDiv.innerHTML = text;
+  } else {
+    messageDiv.textContent = text;
   }
 
-  // Scroll to bottom of chat
+  chatbox.appendChild(messageDiv);
+  chatbox.scrollTop = chatbox.scrollHeight;
+  return messageDiv;
+}
+
+function updateMessage(messageElement, newText) {
+  messageElement.innerHTML = newText;
+  messageElement.classList.remove('loading');
   chatbox.scrollTop = chatbox.scrollHeight;
 }
 
-// Helper function to add messages
-function addMessage(sender, text) {
-  const messageDiv = document.createElement('div');
-  messageDiv.className = `${sender}-message`;
-  messageDiv.textContent = text;
-  chatbox.appendChild(messageDiv);
-}
+// Allow Enter key to send
+input.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendMessage();
+});
