@@ -88,3 +88,24 @@ input.addEventListener('keypress', (e) => {
         sendMessage();
     }
 });
+
+// Add this to your script.js
+function scrollToNewMessage() {
+    const chatBody = document.getElementById('chatbox');
+    const lastMessage = chatBody.lastElementChild;
+    
+    if (lastMessage) {
+        // Scroll to top of new message
+        lastMessage.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+}
+
+// Call this after adding new AI messages
+function sendMessage() {
+    // Your existing code
+    // ...
+    scrollToNewMessage();
+}
