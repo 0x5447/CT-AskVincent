@@ -119,11 +119,11 @@ body {
 }
 
 .bot .bot-icon {
-    width: 30px; /* Adjust size as needed */
-    height: 30px;
+    width: 40px; /* Adjust size as needed */
+    height: 40px;
     position: absolute;
-    top: 20px;
-    left: 20px;
+    top: 5px;
+    left: 5px;
 }
 
 .bot .message-content {
