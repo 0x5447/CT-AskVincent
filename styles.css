@@ -206,11 +206,11 @@ body {
     }
 
     .chat-header {
-        padding: 1.2rem 15px;
+        padding: 15px;
     }
 
     .chat-header h2 {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
     }
 
     .chat-body {
