@@ -1,5 +1,3 @@
-// script.js
-
 // ======================
 // CONFIGURATION (ORIGINAL)
 // ======================
@@ -113,19 +111,41 @@ async function sendMessage() {
 }
 
 // ======================
-// HELPER FUNCTIONS (ORIGINAL)
+// HELPER FUNCTIONS (UPDATED TO INCLUDE BOT ICON)
 // ======================
 function addMessage(sender, text, isHTML = false) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${sender}`;
-    isHTML ? messageDiv.innerHTML = text : messageDiv.textContent = text;
+    
+    if (sender === 'bot') {
+        // Add bot icon
+        const botIcon = document.createElement('img');
+        botIcon.src = 'https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/icon.png';
+        botIcon.alt = 'Bot Icon';
+        botIcon.classList.add('bot-icon');
+        messageDiv.appendChild(botIcon);
+
+        // Add message content
+        const messageContent = document.createElement('div');
+        messageContent.classList.add('message-content');
+        isHTML ? messageContent.innerHTML = text : messageContent.textContent = text;
+        messageDiv.appendChild(messageContent);
+    } else {
+        isHTML ? messageDiv.innerHTML = text : messageDiv.textContent = text;
+    }
+
     chatbox.appendChild(messageDiv);
     scrollToNewMessage(messageDiv);
     return messageDiv;
 }
 
 function updateMessage(messageElement, newText) {
-    messageElement.innerHTML = newText;
+    if (messageElement.classList.contains('bot')) {
+        const messageContent = messageElement.querySelector('.message-content');
+        messageContent.innerHTML = newText;
+    } else {
+        messageElement.innerHTML = newText;
+    }
     messageElement.classList.remove('loading');
     scrollToNewMessage(messageElement);
 }
