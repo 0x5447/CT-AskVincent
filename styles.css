@@ -15,7 +15,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #f0f2f5;
+    background: #f0f2f5 url('your-image-url-here') no-repeat center center fixed;
+    background-size: cover;
     transition: background-color 0.5s ease;
 }
 
