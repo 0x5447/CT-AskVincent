@@ -57,7 +57,7 @@ form.addEventListener('submit', async (e) => {
 
             buffer += decoder.decode(value, { stream: true });
             const events = buffer.split('\n\n');
-            buffer = events.pop(); // Keep incomplete event in buffer
+            buffer = events.pop();
 
             for (const event of events) {
                 const dataLine = event.split('\n').find(line => line.startsWith('data:'));
@@ -85,6 +85,14 @@ form.addEventListener('submit', async (e) => {
     } finally {
         form.querySelector('button').disabled = false;
         input.focus();
+    }
+});
+
+// Prevent Enter from adding a new line
+input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        form.dispatchEvent(new Event('submit'));
     }
 });
 
