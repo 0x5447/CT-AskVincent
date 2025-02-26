@@ -141,12 +141,19 @@ body {
     font-size: 1rem;
     resize: none;
     outline: none;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    line-height: 1.4;
 }
 
 #input:focus {
     border-color: #ff6600;
     box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.2);
+}
+
+#input::placeholder {
+    color: #6b7280;
+    font-style: italic;
+    opacity: 0.8;
 }
 
 .chat-footer button {
@@ -252,7 +259,3 @@ body {
 }
 
 @keyframes dotAnimation {
-    0%, 20% { content: '.'; }
-    40% { content: '..'; }
-    60%, 100% { content: '...'; }
-}
