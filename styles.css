@@ -123,6 +123,97 @@ body {
     line-height: 1.5;
 }
 
+/* Comprehensive Styling for Bot Responses */
+.bot .message-content p {
+    margin-bottom: 0.75rem;
+}
+
+.bot .message-content h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0.75rem 0 0.5rem;
+    color: #1a1a1a;
+}
+
+.bot .message-content h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0.75rem 0 0.5rem;
+    color: #1a1a1a;
+}
+
+.bot .message-content h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0.75rem 0 0.5rem;
+    color: #1a1a1a;
+}
+
+.bot .message-content ul {
+    list-style-type: disc;
+    margin: 0.5rem 0 0.5rem 1.5rem;
+}
+
+.bot .message-content ol {
+    list-style-type: decimal;
+    margin: 0.5rem 0 0.5rem 1.5rem;
+}
+
+.bot .message-content li {
+    margin-bottom: 0.5rem;
+}
+
+.bot .message-content strong {
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.bot .message-content em {
+    font-style: italic;
+}
+
+.bot .message-content code {
+    background: #f1f3f5;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    color: #d6336c;
+}
+
+.bot .message-content pre {
+    background: #f1f3f5;
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 0.75rem 0;
+}
+
+.bot .message-content pre code {
+    background: none;
+    padding: 0;
+    color: #2d3748;
+}
+
+.bot .message-content blockquote {
+    border-left: 4px solid #ff6600;
+    padding: 0.5rem 0 0.5rem 1rem;
+    margin: 0.75rem 0;
+    color: #4b5563;
+    font-style: italic;
+    background: #fafafa;
+}
+
+.bot .message-content a {
+    color: #ff6600;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.bot .message-content a:hover {
+    color: #e65c00;
+}
+
 /* Input Area */
 .chat-footer {
     padding: 1rem;
@@ -221,6 +312,10 @@ body {
     .chat-footer button {
         width: 100%;
     }
+
+    .bot .message-content h1 { font-size: 1.3rem; }
+    .bot .message-content h2 { font-size: 1.15rem; }
+    .bot .message-content h3 { font-size: 1rem; }
 }
 
 @media (max-width: 480px) {
@@ -259,3 +354,7 @@ body {
 }
 
 @keyframes dotAnimation {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
+}
