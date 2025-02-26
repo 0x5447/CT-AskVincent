@@ -2,21 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Venice AI Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Venice - AI Guide</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="background-overlay"></div>
     <div class="chat-container">
-        <header class="chat-header">
-            <h1>Venice AI Chat</h1>
-            <p>Ask me anything!</p>
-        </header>
-        <div class="chat-messages" id="messages"></div>
-        <form class="chat-input" id="chat-form">
-            <textarea id="user-input" placeholder="Type your message..." rows="2" required></textarea>
-            <button type="submit">Send</button>
+        <div class="chat-header">
+            <h2>Hi, I’m Vincent Venice</h2>
+            <p>Your AI guide – ask me anything!</p>
+        </div>
+        <div class="chat-body" id="chatbox">
+            <div class="message bot">
+                <img src="https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/icon.png" alt="Bot Icon" class="bot-icon">
+                <div class="message-content">Welcome! How may I assist you today?</div>
+            </div>
+        </div>
+        <form class="chat-footer" id="chat-form">
+            <textarea id="input" placeholder="I Want To Know About..." rows="1" autocomplete="off" required></textarea>
+            <button type="submit">Ask</button>
         </form>
     </div>
     <script src="script.js"></script>
