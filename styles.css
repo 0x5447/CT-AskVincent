@@ -1,134 +1,258 @@
+/* Base Styles */
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
 }
 
 body {
-    background-color: #f4f7fa;
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    color: #333;
+    background-size: cover;
+    background-position: center;
+    transition: background-image 1s ease-in-out;
 }
 
-.chat-container {
+.background-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    max-width: 800px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.6), rgba(245, 247, 250, 0.6));
+    z-index: 0;
+}
+
+/* Chat Container */
+.chat-container {
+    width: 90%;
+    max-width: 900px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     overflow: hidden;
+    position: relative;
+    z-index: 1;
+    margin: 20px;
     display: flex;
     flex-direction: column;
-    height: 80vh;
-    margin: 20px;
+    height: 85vh;
 }
 
+/* Header */
 .chat-header {
-    background: #007bff;
+    background: #1a1a1a;
     color: #fff;
-    padding: 20px;
+    padding: 1.5rem;
     text-align: center;
 }
 
-.chat-header h1 {
-    font-size: 24px;
-    font-weight: 600;
+.chat-header h2 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 1px;
 }
 
 .chat-header p {
-    font-size: 14px;
-    opacity: 0.8;
+    font-size: 0.9rem;
+    opacity: 0.85;
+    margin-top: 0.3rem;
 }
 
-.chat-messages {
+/* Messages */
+.chat-body {
     flex: 1;
-    padding: 20px;
+    padding: 1.5rem;
     overflow-y: auto;
-    background: #fafafa;
+    background: #f8f9fa;
+    scroll-behavior: smooth;
+}
+
+.chat-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-body::-webkit-scrollbar-thumb {
+    background: #ff6600;
+    border-radius: 3px;
 }
 
 .message {
-    margin-bottom: 15px;
-    padding: 12px 16px;
-    border-radius: 8px;
-    max-width: 80%;
-    word-wrap: break-word;
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    animation: fadeIn 0.3s ease;
 }
 
 .message.user {
-    background: #007bff;
+    background: #1a1a1a;
     color: #fff;
+    padding: 0.8rem 1.2rem;
+    border-radius: 10px;
+    max-width: 70%;
     margin-left: auto;
 }
 
 .message.bot {
-    background: #e9ecef;
-    color: #333;
+    max-width: 70%;
+    margin-right: auto;
+    position: relative;
 }
 
-.chat-input {
-    display: flex;
-    padding: 20px;
-    border-top: 1px solid #eee;
+.bot .bot-icon {
+    width: 36px;
+    height: 36px;
+    margin-right: 0.8rem;
+    border-radius: 50%;
+}
+
+.bot .message-content {
     background: #fff;
+    border: 1px solid #ff6600;
+    padding: 0.8rem 1.2rem;
+    border-radius: 10px;
+    color: #2d3748;
+    font-weight: 500;
+    line-height: 1.5;
 }
 
-.chat-input textarea {
+/* Input Area */
+.chat-footer {
+    padding: 1rem;
+    background: #1a1a1a;
+    display: flex;
+    gap: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#input {
     flex: 1;
-    padding: 12px;
-    border: 1px solid #ddd;
+    padding: 0.8rem 1rem;
+    background: #fff;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
+    font-size: 1rem;
     resize: none;
-    font-size: 16px;
     outline: none;
     transition: border-color 0.2s;
 }
 
-.chat-input textarea:focus {
-    border-color: #007bff;
+#input:focus {
+    border-color: #ff6600;
+    box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.2);
 }
 
-.chat-input button {
-    margin-left: 10px;
-    padding: 12px 20px;
-    background: #007bff;
+.chat-footer button {
+    padding: 0.8rem 1.5rem;
+    background: #ff6600;
     color: #fff;
     border: none;
     border-radius: 8px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     cursor: pointer;
-    font-size: 16px;
-    font-weight: 600;
     transition: background 0.2s;
 }
 
-.chat-input button:hover {
-    background: #0056b3;
+.chat-footer button:hover {
+    background: #e65c00;
 }
 
-@media (max-width: 600px) {
+.chat-footer button:disabled {
+    background: #666;
+    cursor: not-allowed;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
     .chat-container {
-        margin: 10px;
-        height: 90vh;
+        width: 100%;
+        height: 100vh;
+        margin: 0;
+        border-radius: 0;
     }
 
-    .chat-header h1 {
-        font-size: 20px;
+    .chat-header {
+        padding: 1rem;
     }
 
-    .chat-input {
+    .chat-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .chat-header p {
+        font-size: 0.85rem;
+    }
+
+    .chat-body {
+        padding: 1rem;
+    }
+
+    .message.user, .message.bot {
+        max-width: 80%;
+    }
+
+    .bot .bot-icon {
+        width: 30px;
+        height: 30px;
+    }
+
+    .chat-footer {
+        padding: 0.8rem;
         flex-direction: column;
     }
 
-    .chat-input textarea {
-        margin-bottom: 10px;
-    }
-
-    .chat-input button {
-        margin-left: 0;
+    .chat-footer button {
         width: 100%;
     }
+}
+
+@media (max-width: 480px) {
+    .chat-header h2 {
+        font-size: 1.3rem;
+    }
+
+    .chat-header p {
+        font-size: 0.8rem;
+    }
+
+    .bot .bot-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .message.user, .message.bot {
+        font-size: 0.9rem;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.loading-dots {
+    display: inline-block;
+    min-width: 2em;
+}
+
+.loading-dots::after {
+    content: '...';
+    animation: dotAnimation 1.5s infinite;
+}
+
+@keyframes dotAnimation {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
 }
