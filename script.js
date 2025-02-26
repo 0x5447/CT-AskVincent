@@ -67,7 +67,7 @@ form.addEventListener('submit', async (e) => {
                     const data = JSON.parse(dataLine.slice(5));
                     if (data.choices?.[0]?.delta?.content) {
                         content += data.choices[0].delta.content;
-                        updateMessage(loadingMessage, content);
+                        updateMessage(loadingMessage, formatText(content));
                         if (content && loadingMessage.querySelector('.loading-dots')) {
                             loadingMessage.querySelector('.loading-dots').remove();
                         }
@@ -125,4 +125,111 @@ function updateMessage(element, text) {
     const content = element.querySelector('.message-content');
     content.innerHTML = text;
     chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+function formatText(text) {
+    const lines = text.split('\n');
+    let html = '';
+    let inOrderedList = false;
+    let inUnorderedList = false;
+    let inCodeBlock = false;
+    let inBlockquote = false;
+    let listItems = [];
+    let codeBlockContent = [];
+    let blockquoteLines = [];
+
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i].trim();
+
+        // Code block handling
+        if (line.startsWith('```')) {
+            if (!inCodeBlock) {
+                closePendingElements();
+                inCodeBlock = true;
+            } else {
+                html += `<pre><code>${codeBlockContent.join('\n')}</code></pre>`;
+                codeBlockContent = [];
+                inCodeBlock = false;
+            }
+            continue;
+        }
+        if (inCodeBlock) {
+            codeBlockContent.push(line);
+            continue;
+        }
+
+        // Heading detection (#, ##, ###)
+        if (line.match(/^#{1,3}\s/)) {
+            closePendingElements();
+            const level = line.match(/^#+/)[0].length;
+            const content = line.replace(/^#+\s/, '');
+            html += `<h${level}>${inlineFormat(content)}</h${level}>`;
+            continue;
+        }
+
+        // Ordered list detection (1., 2.)
+        if (line.match(/^\d+\.\s+/)) {
+            if (!inOrderedList) closePendingElements();
+            inOrderedList = true;
+            inUnorderedList = false;
+            listItems.push(`<li>${inlineFormat(line.replace(/^\d+\.\s+/, ''))}</li>`);
+            continue;
+        }
+
+        // Unordered list detection (-, *)
+        if (line.match(/^[-*]\s+/)) {
+            if (!inUnorderedList) closePendingElements();
+            inUnorderedList = true;
+            inOrderedList = false;
+            listItems.push(`<li>${inlineFormat(line.replace(/^[-*]\s+/, ''))}</li>`);
+            continue;
+        }
+
+        // Blockquote detection (>)
+        if (line.startsWith('>')) {
+            if (!inBlockquote) closePendingElements();
+            inBlockquote = true;
+            blockquoteLines.push(inlineFormat(line.replace(/^>\s*/, '')));
+            continue;
+        }
+
+        // End of structured content
+        if (line && !inOrderedList && !inUnorderedList && !inBlockquote) {
+            closePendingElements();
+            html += `<p>${inlineFormat(line)}</p>`;
+        } else if (!line && (inOrderedList || inUnorderedList || inBlockquote)) {
+            closePendingElements();
+        }
+    }
+
+    // Close any remaining elements
+    closePendingElements();
+
+    return html || text;
+
+    function closePendingElements() {
+        if (listItems.length) {
+            html += (inOrderedList ? '<ol>' : '<ul>') + listItems.join('') + (inOrderedList ? '</ol>' : '</ul>');
+            listItems = [];
+            inOrderedList = false;
+            inUnorderedList = false;
+        }
+        if (blockquoteLines.length) {
+            html += `<blockquote>${blockquoteLines.join('<br>')}</blockquote>`;
+            blockquoteLines = [];
+            inBlockquote = false;
+        }
+    }
+
+    function inlineFormat(text) {
+        // Bold (**text** or __text__)
+        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/__(.*?)__/g, '<strong>$1</strong>');
+        // Italic (*text* or _text_)
+        text = text.replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/_(.*?)_/g, '<em>$1</em>');
+        // Inline code (`text`)
+        text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+        // Links (basic URL detection)
+        text = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+        return text;
+    }
 }
