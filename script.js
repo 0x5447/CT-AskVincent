@@ -1,5 +1,5 @@
 // Configuration
-const WORKER_URL = 'https://venice-chatbot.graham-business-ventures.workers.dev';
+const WORKER_URL = 'https://ctguide.graham-business-ventures.workers.dev';
 const BACKGROUND_IMAGES = [
     'https://raw.githubusercontent.com/TGrahamGit/venice-mso/main/VeniceAI_Vf7NGoK.webp',
     'https://raw.githubusercontent.com/TGrahamGit/venice-mso/main/VeniceAI_jXw0mwJ.webp',
