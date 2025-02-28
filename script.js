@@ -11,9 +11,12 @@ const form = document.getElementById('chat-form');
 const input = document.getElementById('input');
 const chatbox = document.getElementById('chatbox');
 let bgIndex = 0;
+let chatHistory = [];
+let lastMessageTime = 0;
+const RATE_LIMIT_MS = 3000;
 
 // Background System
-BACKGROUND_IMAGES.forEach(url => new Image().src = url); // Preload images
+BACKGROUND_IMAGES.forEach(url => new Image().src = url);
 
 function rotateBackground() {
     document.body.style.backgroundImage = `url(${BACKGROUND_IMAGES[bgIndex]})`;
@@ -29,14 +32,34 @@ form.addEventListener('submit', async (e) => {
     const userMessage = input.value.trim();
     if (!userMessage) return;
 
+    const now = Date.now();
+    if (now - lastMessageTime < RATE_LIMIT_MS) {
+        addMessage('bot', '⚠️ Please wait a few seconds before sending another message.');
+        return;
+    }
+    lastMessageTime = now;
+
     addMessage('user', userMessage);
+    chatHistory.push(`You: ${userMessage}`);
     input.value = '';
     form.querySelector('button').disabled = true;
 
     const loadingMessage = addMessage('bot', '<span class="loading-dots"></span>', true);
 
     try {
-        const response = await fetch(`${WORKER_URL}?query=${encodeURIComponent(userMessage)}`);
+        const token = await new Promise((resolve) => {
+            turnstile.ready(() => {
+                turnstile.render('.cf-turnstile', {
+                    sitekey: 'YOUR_TURNSTILE_SITE_KEY',
+                    callback: (token) => resolve(token)
+                });
+            });
+        });
+
+        const response = await fetch(`${WORKER_URL}?query=${encodeURIComponent(userMessage)}&cfToken=${encodeURIComponent(token)}`, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || `HTTP Error: ${response.status}`);
@@ -78,7 +101,11 @@ form.addEventListener('submit', async (e) => {
             }
         }
 
-        if (!content) updateMessage(loadingMessage, '⚠️ No response received');
+        if (!content) {
+            updateMessage(loadingMessage, '⚠️ No response received');
+        } else {
+            chatHistory.push(`Vincent Venice: ${content}`);
+        }
 
     } catch (error) {
         updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
@@ -141,7 +168,6 @@ function formatText(text) {
     for (let i = 0; i < lines.length; i++) {
         let line = lines[i].trim();
 
-        // Code block handling
         if (line.startsWith('```')) {
             if (!inCodeBlock) {
                 closePendingElements();
@@ -158,7 +184,6 @@ function formatText(text) {
             continue;
         }
 
-        // Heading detection (#, ##, ###)
         if (line.match(/^#{1,3}\s/)) {
             closePendingElements();
             const level = line.match(/^#+/)[0].length;
@@ -167,7 +192,6 @@ function formatText(text) {
             continue;
         }
 
-        // Ordered list detection (1., 2.)
         if (line.match(/^\d+\.\s+/)) {
             if (!inOrderedList) closePendingElements();
             inOrderedList = true;
@@ -176,7 +200,6 @@ function formatText(text) {
             continue;
         }
 
-        // Unordered list detection (-, *)
         if (line.match(/^[-*]\s+/)) {
             if (!inUnorderedList) closePendingElements();
             inUnorderedList = true;
@@ -185,7 +208,6 @@ function formatText(text) {
             continue;
         }
 
-        // Blockquote detection (>)
         if (line.startsWith('>')) {
             if (!inBlockquote) closePendingElements();
             inBlockquote = true;
@@ -193,7 +215,6 @@ function formatText(text) {
             continue;
         }
 
-        // End of structured content
         if (line && !inOrderedList && !inUnorderedList && !inBlockquote) {
             closePendingElements();
             html += `<p>${inlineFormat(line)}</p>`;
@@ -202,7 +223,6 @@ function formatText(text) {
         }
     }
 
-    // Close any remaining elements
     closePendingElements();
 
     return html || text;
@@ -222,14 +242,29 @@ function formatText(text) {
     }
 
     function inlineFormat(text) {
-        // Bold (**text** or __text__)
         text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/__(.*?)__/g, '<strong>$1</strong>');
-        // Italic (*text* or _text_)
         text = text.replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/_(.*?)_/g, '<em>$1</em>');
-        // Inline code (`text`)
         text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
-        // Links (basic URL detection)
         text = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
         return text;
     }
+}
+
+// Download Chat Function
+function downloadChat() {
+    if (!chatHistory.length) {
+        alert('No chat history to download yet!');
+        return;
+    }
+    const blob = new Blob([chatHistory.join('\n')], { type: 'text/plain' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'venice_chat_history.txt';
+    link.click();
+}
+
+// Suggested Prompts Function
+function usePrompt(text) {
+    input.value = text;
+    form.dispatchEvent(new Event('submit'));
 }
