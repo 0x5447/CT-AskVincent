@@ -21,25 +21,24 @@
     <main class="chat-page">
         <div class="chat-container">
             <div class="chat-header">
-                <h1>Hi, I’m Vincent Venice</h1>
-                <p>Your AI guide – ask me anything!</p>
+                <h1>Hi, I’m Vincent</h1>
+                <p>I am your AI guide to explore everything Connecticut. Ask me anything</p>
             </div>
             <div class="chat-body" id="chatbox">
                 <div class="message bot">
                     <img src="https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/icon.png" alt="Bot Icon" class="bot-icon">
-                    <div class="message-content">Welcome! How may I assist you today?</div>
+                    <div class="message-content">Welcome! Please let me know how I may help</div>
                 </div>
             </div>
             <div class="chat-controls">
                 <div class="suggested-prompts" id="suggested-prompts">
-                    <button onclick="usePrompt('Tell me a joke')">Tell me a joke</button>
-                    <button onclick="usePrompt('What’s the weather like today?')">Check the weather</button>
-                    <button onclick="usePrompt('Give me a fun fact')">Fun fact</button>
+                    <button onclick="usePrompt('What is the best pizza in Hartford?')">What is the best pizza in Hartford?</button>
+                    <button onclick="usePrompt('What are the best parks around Bristol?')">What are the best parks around Bristol?</button>
                 </div>
                 <button class="download-btn" onclick="downloadChat()">Download Chat</button>
             </div>
             <form class="chat-footer" id="chat-form">
-                <textarea id="input" placeholder="What’s on your mind? Let’s explore it together..." rows="1" autocomplete="off" required></textarea>
+                <textarea id="input" placeholder="What would you like to learn?" rows="1" autocomplete="off" required></textarea>
                 <div class="cf-turnstile" data-sitekey="0x4AAAAAAA_CsY1Tr0uuxaor"></div>
                 <button type="submit" class="ask-btn">Ask</button>
             </form>
