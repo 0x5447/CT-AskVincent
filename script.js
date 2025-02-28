@@ -47,14 +47,13 @@ form.addEventListener('submit', async (e) => {
     const loadingMessage = addMessage('bot', '<span class="loading-dots"></span>', true);
 
     try {
-        const token = await new Promise((resolve) => {
-            turnstile.ready(() => {
-                turnstile.render('.cf-turnstile', {
-                    sitekey: 'YOUR_TURNSTILE_SITE_KEY',
-                    callback: (token) => resolve(token)
-                });
-            });
-        });
+        // Get the Turnstile token from the widget
+        const token = document.querySelector('.cf-turnstile').getAttribute('data-response') || 
+                      (typeof turnstile !== 'undefined' ? await turnstile.getResponse('.cf-turnstile') : null);
+
+        if (!token) {
+            throw new Error('Turnstile token not found. Please verify you’re human.');
+        }
 
         const response = await fetch(`${WORKER_URL}?query=${encodeURIComponent(userMessage)}&cfToken=${encodeURIComponent(token)}`, {
             headers: { 'Content-Type': 'application/json' }
@@ -109,9 +108,14 @@ form.addEventListener('submit', async (e) => {
 
     } catch (error) {
         updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
+        console.error('Submission error:', error);
     } finally {
         form.querySelector('button').disabled = false;
         input.focus();
+        // Reset Turnstile widget after submission
+        if (typeof turnstile !== 'undefined') {
+            turnstile.reset('.cf-turnstile');
+        }
     }
 });
 
