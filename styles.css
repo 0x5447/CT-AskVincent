@@ -14,7 +14,7 @@ body {
     background-position: center;
     background-color: #f0f2f5;
     transition: background-image 1s ease-in-out;
-    position: relative; /* Ensure body is a stacking context */
+    position: relative;
 }
 
 .background-overlay {
@@ -24,8 +24,8 @@ body {
     width: 100%;
     height: 100%;
     background: linear-gradient(45deg, rgba(255, 255, 255, 0.6), rgba(245, 247, 250, 0.6));
-    z-index: -1; /* Behind everything */
-    pointer-events: none; /* Allow clicks to pass through */
+    z-index: -1;
+    pointer-events: none;
 }
 
 /* Header and Navigation */
@@ -34,7 +34,7 @@ header {
     top: 0;
     width: 100%;
     background: #1a1a1a;
-    z-index: 10; /* Above overlay */
+    z-index: 10;
 }
 
 .main-nav {
@@ -63,12 +63,12 @@ header {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding-top: 80px; /* Offset for fixed header */
+    padding-top: 80px;
 }
 
 .chat-container {
     width: 90%;
-    max-width: 900px;
+    max-width: 1200px; /* Increased from 900px */
     min-height: 400px;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 16px;
@@ -79,7 +79,7 @@ header {
     height: 85vh;
     margin: 20px;
     position: relative;
-    z-index: 1; /* Above overlay */
+    z-index: 1;
 }
 
 .chat-header {
@@ -135,12 +135,12 @@ header {
     color: #ffffff;
     padding: 0.8rem 1.2rem;
     border-radius: 10px;
-    max-width: 70%;
+    max-width: 85%; /* Slightly increased */
     margin-left: auto;
 }
 
 .message.bot {
-    max-width: 70%;
+    max-width: 90%; /* Increased from 70% */
     margin-right: auto;
     display: flex;
     align-items: flex-start;
@@ -156,11 +156,12 @@ header {
 .bot .message-content {
     background: #ffffff;
     border: 2px solid #ff6600;
-    padding: 0.8rem 1.2rem;
+    padding: 1rem 1.5rem; /* Slightly increased padding */
     border-radius: 10px;
     color: #2d3748;
     font-weight: 500;
     line-height: 1.6;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Added subtle shadow for distinction */
 }
 
 .bot .message-content p {
@@ -258,43 +259,45 @@ header {
     outline: none;
 }
 
-.chat-tools {
+.chat-controls {
     padding: 0.5rem 1.5rem;
-    text-align: right;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
-.chat-tools button {
-    padding: 0.5rem 1rem;
+.download-btn {
+    padding: 0.6rem 1.2rem; /* Slightly larger */
     background: #ff6600;
     color: #ffffff;
     border: none;
     border-radius: 8px;
     font-family: 'Oswald', sans-serif;
-    font-size: 0.9rem;
+    font-size: 1rem;
     text-transform: uppercase;
     cursor: pointer;
     transition: background 0.2s ease;
 }
 
-.chat-tools button:hover {
+.download-btn:hover {
     background: #e65c00;
 }
 
 .suggested-prompts {
-    padding: 0.5rem 1.5rem;
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
 }
 
 .suggested-prompts button {
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1.2rem; /* Slightly larger */
     background: #ffffff;
     border: 2px solid #ff6600;
     border-radius: 8px;
     color: #ff6600;
     font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
+    font-size: 1rem;
     cursor: pointer;
     transition: background 0.2s ease, color 0.2s ease;
 }
@@ -321,10 +324,13 @@ header {
     border: 2px solid #e2e8f0;
     border-radius: 8px;
     font-size: 1rem;
+    font-weight: 600; /* Bolder */
+    color: #1a1a1a; /* Darker */
     resize: none;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
     line-height: 1.5;
+    min-width: 0; /* Allow flex shrinkage */
 }
 
 #input:focus {
@@ -335,30 +341,31 @@ header {
 #input::placeholder {
     color: #6b7280;
     font-style: italic;
+    font-weight: 400; /* Normal for placeholder */
     opacity: 1;
 }
 
-.chat-footer button {
-    padding: 0.8rem 1.5rem;
+.ask-btn {
+    padding: 1rem 2rem; /* Increased size */
     background: #ff6600;
     color: #ffffff;
     border: none;
     border-radius: 8px;
     font-family: 'Oswald', sans-serif;
-    font-size: 1.1rem;
+    font-size: 1.2rem; /* Slightly larger */
     text-transform: uppercase;
     letter-spacing: 1px;
     cursor: pointer;
     transition: background 0.2s ease;
 }
 
-.chat-footer button:hover,
-.chat-footer button:focus {
+.ask-btn:hover,
+.ask-btn:focus {
     background: #e65c00;
     outline: none;
 }
 
-.chat-footer button:disabled {
+.ask-btn:disabled {
     background: #666666;
     cursor: not-allowed;
     opacity: 0.7;
@@ -386,7 +393,7 @@ header {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     margin: 20px;
     position: relative;
-    z-index: 1; /* Above overlay */
+    z-index: 1;
 }
 
 .content-section h1 {
@@ -464,12 +471,24 @@ header {
 
     .message.user,
     .message.bot {
-        max-width: 80%;
+        max-width: 90%; /* Consistent on mobile */
     }
 
     .bot .bot-icon {
         width: 30px;
         height: 30px;
+    }
+
+    .chat-controls {
+        padding: 0.8rem 1rem;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .download-btn,
+    .suggested-prompts button {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
     }
 
     .chat-footer {
@@ -478,16 +497,14 @@ header {
         gap: 10px;
     }
 
-    .chat-footer button {
+    #input {
+        width: 100%; /* Full width on mobile */
+    }
+
+    .ask-btn {
         width: 100%;
-    }
-
-    .chat-tools {
-        text-align: center;
-    }
-
-    .suggested-prompts {
-        justify-content: center;
+        padding: 0.8rem 1.5rem;
+        font-size: 1.1rem;
     }
 
     .cf-turnstile {
