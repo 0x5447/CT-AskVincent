@@ -30,20 +30,6 @@
             <p>Solana (SOL): <code>your-solana-address</code></p>
         </section>
     </main>
-    <script>
-        const BACKGROUND_IMAGES = [
-            'https://raw.githubusercontent.com/0xTG/venice-mso/main/VeniceAI_Vf7NGoK.webp',
-            'https://raw.githubusercontent.com/0xTG/venice-mso/main/VeniceAI_jXw0mwJ.webp',
-            'https://raw.githubusercontent.com/0xTG/venice-mso/main/VeniceAI_sFkAxgA.webp'
-        ];
-        let bgIndex = 0;
-        BACKGROUND_IMAGES.forEach(url => new Image().src = url);
-        function rotateBackground() {
-            document.body.style.backgroundImage = `url(${BACKGROUND_IMAGES[bgIndex]})`;
-            bgIndex = (bgIndex + 1) % BACKGROUND_IMAGES.length;
-        }
-        rotateBackground();
-        setInterval(rotateBackground, 30000);
-    </script>
+    <script src="/script.js"></script>
 </body>
 </html>
