@@ -7,15 +7,15 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    font-size: 16px; /* Base font size for better readability */
-    line-height: 1.6; /* Improved line spacing */
+    font-size: 16px;
+    line-height: 1.6;
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     background-size: cover;
     background-position: center;
-    background-color: #f0f2f5; /* Fallback color */
+    background-color: #f0f2f5;
     transition: background-image 1s ease-in-out;
 }
 
@@ -34,7 +34,7 @@ body {
     width: 90%;
     max-width: 900px;
     min-height: 400px;
-    background: rgba(255, 255, 255, 0.95); /* Slightly increased opacity */
+    background: rgba(255, 255, 255, 0.95);
     border-radius: 16px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     overflow: hidden;
@@ -44,6 +44,7 @@ body {
     display: flex;
     flex-direction: column;
     height: 85vh;
+    margin-top: 60px; /* Offset for fixed nav */
 }
 
 /* Chat Header */
@@ -65,7 +66,7 @@ body {
     font-size: 0.9rem;
     opacity: 0.9;
     margin-top: 0.3rem;
-    color: #e0e0e0; /* Improved contrast */
+    color: #e0e0e0;
 }
 
 /* Chat Body */
@@ -78,7 +79,7 @@ body {
 }
 
 .chat-body::-webkit-scrollbar {
-    width: 8px; /* Slightly wider for better usability */
+    width: 8px;
 }
 
 .chat-body::-webkit-scrollbar-track {
@@ -124,7 +125,7 @@ body {
 
 .bot .message-content {
     background: #ffffff;
-    border: 2px solid #ff6600; /* Thicker border for visibility */
+    border: 2px solid #ff6600;
     padding: 0.8rem 1.2rem;
     border-radius: 10px;
     color: #2d3748;
@@ -160,7 +161,7 @@ body {
 
 .bot .message-content ul {
     list-style-type: disc;
-    margin: 0.5rem 0 0.5rem 2rem; /* Increased indent */
+    margin: 0.5rem 0 0.5rem 2rem;
     padding-left: 0;
 }
 
@@ -233,6 +234,8 @@ body {
     padding: 1rem;
     background: #1a1a1a;
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     gap: 12px;
     border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
@@ -287,6 +290,84 @@ body {
     opacity: 0.7;
 }
 
+/* Navigation */
+nav {
+    text-align: center;
+    padding: 1rem;
+    background: #1a1a1a;
+    color: #ffffff;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 2;
+}
+
+nav a {
+    color: #ff6600;
+    text-decoration: none;
+    margin: 0 1rem;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+}
+
+nav a:hover {
+    color: #e65c00;
+}
+
+/* Chat Tools (Download Button) */
+.chat-tools {
+    padding: 0.5rem 1.5rem;
+    text-align: right;
+}
+
+.chat-tools button {
+    padding: 0.5rem 1rem;
+    background: #ff6600;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.chat-tools button:hover {
+    background: #e65c00;
+}
+
+/* Suggested Prompts */
+.suggested-prompts {
+    padding: 0.5rem 1.5rem;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.suggested-prompts button {
+    padding: 0.5rem 1rem;
+    background: #ffffff;
+    border: 2px solid #ff6600;
+    border-radius: 8px;
+    color: #ff6600;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.suggested-prompts button:hover {
+    background: #ff6600;
+    color: #ffffff;
+}
+
+/* Turnstile */
+.cf-turnstile {
+    margin: 0 12px;
+}
+
 /* Media Queries */
 @media (max-width: 768px) {
     .chat-container {
@@ -335,6 +416,27 @@ body {
     .bot .message-content h1 { font-size: 1.3rem; }
     .bot .message-content h2 { font-size: 1.15rem; }
     .bot .message-content h3 { font-size: 1rem; }
+
+    nav {
+        padding: 0.8rem;
+    }
+
+    nav a {
+        font-size: 0.9rem;
+        margin: 0 0.5rem;
+    }
+
+    .chat-tools {
+        text-align: center;
+    }
+
+    .suggested-prompts {
+        justify-content: center;
+    }
+
+    .cf-turnstile {
+        margin: 10px 0;
+    }
 }
 
 @media (max-width: 480px) {
