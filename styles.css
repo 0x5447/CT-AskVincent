@@ -263,8 +263,26 @@ header {
     padding: 0.5rem 1.5rem;
     display: flex;
     align-items: center;
+    justify-content: space-between; /* Pushes download-btn to the right */
     gap: 15px;
     flex-wrap: wrap;
+}
+
+.download-btn {
+    padding: 0.6rem 1.2rem;
+    background: #ff6600;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.download-btn:hover {
+    background: #e65c00;
 }
 
 .suggested-prompts {
@@ -298,26 +316,6 @@ header {
     align-items: center;
     gap: 12px;
     border-top: 1px solid rgba(255, 255, 255, 0.15);
-    position: relative;
-}
-
-.download-btn {
-    padding: 0.6rem 1.2rem;
-    background: #ff6600;
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    font-family: 'Oswald', sans-serif;
-    font-size: 1rem;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: background 0.2s ease;
-    order: 2;
-    margin-left: auto;
-}
-
-.download-btn:hover {
-    background: #e65c00;
 }
 
 #input {
@@ -486,6 +484,11 @@ header {
         padding: 0.8rem 1rem;
         flex-direction: column;
         align-items: stretch;
+        justify-content: center;
+    }
+
+    .download-btn {
+        margin-top: 10px;
     }
 
     .suggested-prompts button {
@@ -497,12 +500,6 @@ header {
         padding: 0.8rem;
         flex-direction: column;
         gap: 10px;
-    }
-
-    .download-btn {
-        width: auto;
-        margin-left: 0;
-        order: -1; /* Above textarea on mobile */
     }
 
     #input {
