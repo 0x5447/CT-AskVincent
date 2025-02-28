@@ -6,18 +6,7 @@ const BACKGROUND_IMAGES = [
     'https://raw.githubusercontent.com/0xTG/venice-mso/main/VeniceAI_sFkAxgA.webp'
 ];
 
-// DOM Elements
-const form = document.getElementById('chat-form');
-const input = document.getElementById('input');
-const chatbox = document.getElementById('chatbox');
-const turnstileWidget = document.querySelector('.cf-turnstile');
-let bgIndex = 0;
-let chatHistory = [];
-let lastMessageTime = 0;
-const RATE_LIMIT_MS = 3000;
-let isVerified = false; // Track verification status
-
-// Background System
+// Background System (Shared across all pages)
 BACKGROUND_IMAGES.forEach(url => new Image().src = url);
 
 function rotateBackground() {
@@ -25,122 +14,139 @@ function rotateBackground() {
     bgIndex = (bgIndex + 1) % BACKGROUND_IMAGES.length;
 }
 
+let bgIndex = 0;
 rotateBackground();
 setInterval(rotateBackground, 30000);
 
-// Chat Functions
-form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const userMessage = input.value.trim();
-    if (!userMessage) return;
+// Chat-specific logic (only runs if elements exist)
+const form = document.getElementById('chat-form');
+const input = document.getElementById('input');
+const chatbox = document.getElementById('chatbox');
+const turnstileWidget = document.querySelector('.cf-turnstile');
+let chatHistory = [];
+let lastMessageTime = 0;
+const RATE_LIMIT_MS = 3000;
+let isVerified = false;
 
-    const now = Date.now();
-    if (now - lastMessageTime < RATE_LIMIT_MS) {
-        addMessage('bot', '⚠️ Please wait a few seconds before sending another message.');
-        return;
-    }
-    lastMessageTime = now;
+if (form && input && chatbox) {
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userMessage = input.value.trim();
+        if (!userMessage) return;
 
-    addMessage('user', userMessage);
-    chatHistory.push(`You: ${userMessage}`);
-    input.value = '';
-    form.querySelector('button').disabled = true;
-
-    const loadingMessage = addMessage('bot', '<span class="loading-dots"></span>', true);
-
-    try {
-        let token = null;
-        if (!isVerified) {
-            token = turnstileWidget.getAttribute('data-response') || 
-                    (typeof turnstile !== 'undefined' ? await turnstile.getResponse('.cf-turnstile') : null);
-
-            if (!token) {
-                throw new Error('Turnstile token not found. Please verify you’re human.');
-            }
+        const now = Date.now();
+        if (now - lastMessageTime < RATE_LIMIT_MS) {
+            addMessage('bot', '⚠️ Please wait a few seconds before sending another message.');
+            return;
         }
+        lastMessageTime = now;
 
-        const url = isVerified 
-            ? `${WORKER_URL}?query=${encodeURIComponent(userMessage)}` 
-            : `${WORKER_URL}?query=${encodeURIComponent(userMessage)}&cfToken=${encodeURIComponent(token)}`;
+        addMessage('user', userMessage);
+        chatHistory.push(`You: ${userMessage}`);
+        input.value = '';
+        form.querySelector('button').disabled = true;
 
-        const response = await fetch(url, {
-            headers: { 'Content-Type': 'application/json' }
-        });
+        const loadingMessage = addMessage('bot', '<span class="loading-dots"></span>', true);
 
-        if (!response.ok) {
-            const contentType = response.headers.get('content-type');
-            let errorMessage = 'Unknown error';
-            if (contentType && contentType.includes('application/json')) {
-                const errorData = await response.json();
-                errorMessage = errorData.error || `HTTP Error: ${response.status}`;
-            } else {
-                errorMessage = await response.text() || `HTTP Error: ${response.status}`;
-            }
-            throw new Error(errorMessage);
-        }
+        try {
+            let token = null;
+            if (!isVerified) {
+                token = turnstileWidget.getAttribute('data-response') || 
+                        (typeof turnstile !== 'undefined' ? await turnstile.getResponse('.cf-turnstile') : null);
 
-        if (!response.headers.get('content-type')?.includes('text/event-stream')) {
-            throw new Error('Unexpected response format');
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-        let content = '';
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const events = buffer.split('\n\n');
-            buffer = events.pop();
-
-            for (const event of events) {
-                const dataLine = event.split('\n').find(line => line.startsWith('data:'));
-                if (!dataLine) continue;
-
-                try {
-                    const data = JSON.parse(dataLine.slice(5));
-                    if (data.choices?.[0]?.delta?.content) {
-                        content += data.choices[0].delta.content;
-                        updateMessage(loadingMessage, formatText(content));
-                        if (content && loadingMessage.querySelector('.loading-dots')) {
-                            loadingMessage.querySelector('.loading-dots').remove();
-                        }
-                    }
-                } catch (e) {
-                    console.error('Parse error:', e);
+                if (!token) {
+                    throw new Error('Turnstile token not found. Please verify you’re human.');
                 }
             }
-        }
 
-        if (!content) {
-            updateMessage(loadingMessage, '⚠️ No response received');
-        } else {
-            chatHistory.push(`Vincent Venice: ${content}`);
-            if (!isVerified && token) {
-                isVerified = true; // Mark as verified after first success
-                turnstileWidget.style.display = 'none'; // Hide Turnstile widget
+            const url = isVerified 
+                ? `${WORKER_URL}?query=${encodeURIComponent(userMessage)}` 
+                : `${WORKER_URL}?query=${encodeURIComponent(userMessage)}&cfToken=${encodeURIComponent(token)}`;
+
+            const response = await fetch(url, {
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!response.ok) {
+                const contentType = response.headers.get('content-type');
+                let errorMessage = 'Unknown error';
+                if (contentType && contentType.includes('application/json')) {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || `HTTP Error: ${response.status}`;
+                } else {
+                    errorMessage = await response.text() || `HTTP Error: ${response.status}`;
+                }
+                throw new Error(errorMessage);
             }
+
+            const contentType = response.headers.get('content-type');
+            if (contentType?.includes('text/event-stream')) {
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let content = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const events = buffer.split('\n\n');
+                    buffer = events.pop();
+
+                    for (const event of events) {
+                        const dataLine = event.split('\n').find(line => line.startsWith('data:'));
+                        if (!dataLine) continue;
+
+                        try {
+                            const data = JSON.parse(dataLine.slice(5));
+                            if (data.choices?.[0]?.delta?.content) {
+                                content += data.choices[0].delta.content;
+                                updateMessage(loadingMessage, formatText(content));
+                                if (content && loadingMessage.querySelector('.loading-dots')) {
+                                    loadingMessage.querySelector('.loading-dots').remove();
+                                }
+                            }
+                        } catch (e) {
+                            console.error('Parse error:', e);
+                        }
+                    }
+                }
+
+                if (!content) {
+                    updateMessage(loadingMessage, '⚠️ No response received');
+                } else {
+                    chatHistory.push(`Vincent Venice: ${content}`);
+                }
+            } else if (contentType?.includes('application/json')) {
+                const data = await response.json();
+                const content = data.reply || 'No reply provided';
+                updateMessage(loadingMessage, formatText(content));
+                chatHistory.push(`Vincent Venice: ${content}`);
+            } else {
+                throw new Error('Unexpected response format');
+            }
+
+            if (!isVerified && token) {
+                isVerified = true;
+                turnstileWidget.style.display = 'none';
+            }
+        } catch (error) {
+            updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
+            console.error('Submission error:', error);
+        } finally {
+            form.querySelector('button').disabled = false;
+            input.focus();
         }
+    });
 
-    } catch (error) {
-        updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
-        console.error('Submission error:', error);
-    } finally {
-        form.querySelector('button').disabled = false;
-        input.focus();
-    }
-});
-
-// Prevent Enter from adding a new line
-input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        form.dispatchEvent(new Event('submit'));
-    }
-});
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            form.dispatchEvent(new Event('submit'));
+        }
+    });
+}
 
 // Helper Functions
 function addMessage(sender, text, isHTML = false) {
@@ -269,7 +275,6 @@ function formatText(text) {
     }
 }
 
-// Download Chat Function
 function downloadChat() {
     if (!chatHistory.length) {
         alert('No chat history to download yet!');
@@ -282,8 +287,9 @@ function downloadChat() {
     link.click();
 }
 
-// Suggested Prompts Function
 function usePrompt(text) {
-    input.value = text;
-    form.dispatchEvent(new Event('submit'));
+    if (input) {
+        input.value = text;
+        form.dispatchEvent(new Event('submit'));
+    }
 }
