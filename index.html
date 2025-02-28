@@ -6,7 +6,7 @@
     <title>Venice - AI Guide</title>
     <link rel="stylesheet" href="/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script> <!-- Removed async defer -->
 </head>
 <body>
     <div class="background-overlay"></div>
@@ -40,7 +40,7 @@
             </div>
             <form class="chat-footer" id="chat-form">
                 <textarea id="input" placeholder="What’s on your mind? Let’s explore it together..." rows="1" autocomplete="off" required></textarea>
-                <div class="cf-turnstile" data-sitekey="0x4AAAAAAA_CsY1Tr0uuxaor"></div>
+                <div class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITE_KEY"></div>
                 <button type="submit">Ask</button>
             </form>
         </div>
