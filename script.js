@@ -55,7 +55,7 @@ if (form && input && chatbox) {
                         (typeof turnstile !== 'undefined' ? await turnstile.getResponse('.cf-turnstile') : null);
 
                 if (!token) {
-                    throw new Error('Please verify you’re human first');
+                    throw new Error('Please verify you are human first');
                 }
             }
 
