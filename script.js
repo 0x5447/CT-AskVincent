@@ -14,6 +14,7 @@ let bgIndex = 0;
 let chatHistory = [];
 let lastMessageTime = 0;
 const RATE_LIMIT_MS = 3000;
+let isVerified = false; // Track verification status
 
 // Background System
 BACKGROUND_IMAGES.forEach(url => new Image().src = url);
@@ -47,15 +48,22 @@ form.addEventListener('submit', async (e) => {
     const loadingMessage = addMessage('bot', '<span class="loading-dots"></span>', true);
 
     try {
-        // Get the Turnstile token from the widget
-        const token = document.querySelector('.cf-turnstile').getAttribute('data-response') || 
-                      (typeof turnstile !== 'undefined' ? await turnstile.getResponse('.cf-turnstile') : null);
+        let token = null;
+        if (!isVerified) {
+            // Get the Turnstile token only if not yet verified
+            token = document.querySelector('.cf-turnstile').getAttribute('data-response') || 
+                    (typeof turnstile !== 'undefined' ? await turnstile.getResponse('.cf-turnstile') : null);
 
-        if (!token) {
-            throw new Error('Turnstile token not found. Please verify you’re human.');
+            if (!token) {
+                throw new Error('Turnstile token not found. Please verify you’re human.');
+            }
         }
 
-        const response = await fetch(`${WORKER_URL}?query=${encodeURIComponent(userMessage)}&cfToken=${encodeURIComponent(token)}`, {
+        const url = isVerified 
+            ? `${WORKER_URL}?query=${encodeURIComponent(userMessage)}` 
+            : `${WORKER_URL}?query=${encodeURIComponent(userMessage)}&cfToken=${encodeURIComponent(token)}`;
+
+        const response = await fetch(url, {
             headers: { 'Content-Type': 'application/json' }
         });
 
@@ -104,6 +112,12 @@ form.addEventListener('submit', async (e) => {
             updateMessage(loadingMessage, '⚠️ No response received');
         } else {
             chatHistory.push(`Vincent Venice: ${content}`);
+            if (!isVerified && token) {
+                isVerified = true; // Mark as verified after first successful response
+                if (typeof turnstile !== 'undefined') {
+                    turnstile.reset('.cf-turnstile'); // Reset widget after successful verification
+                }
+            }
         }
 
     } catch (error) {
@@ -112,10 +126,6 @@ form.addEventListener('submit', async (e) => {
     } finally {
         form.querySelector('button').disabled = false;
         input.focus();
-        // Reset Turnstile widget after submission
-        if (typeof turnstile !== 'undefined') {
-            turnstile.reset('.cf-turnstile');
-        }
     }
 });
 
