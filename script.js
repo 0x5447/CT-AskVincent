@@ -10,6 +10,7 @@ const BACKGROUND_IMAGES = [
 const form = document.getElementById('chat-form');
 const input = document.getElementById('input');
 const chatbox = document.getElementById('chatbox');
+const turnstileWidget = document.querySelector('.cf-turnstile');
 let bgIndex = 0;
 let chatHistory = [];
 let lastMessageTime = 0;
@@ -50,8 +51,7 @@ form.addEventListener('submit', async (e) => {
     try {
         let token = null;
         if (!isVerified) {
-            // Get the Turnstile token only if not yet verified
-            token = document.querySelector('.cf-turnstile').getAttribute('data-response') || 
+            token = turnstileWidget.getAttribute('data-response') || 
                     (typeof turnstile !== 'undefined' ? await turnstile.getResponse('.cf-turnstile') : null);
 
             if (!token) {
@@ -68,8 +68,15 @@ form.addEventListener('submit', async (e) => {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `HTTP Error: ${response.status}`);
+            const contentType = response.headers.get('content-type');
+            let errorMessage = 'Unknown error';
+            if (contentType && contentType.includes('application/json')) {
+                const errorData = await response.json();
+                errorMessage = errorData.error || `HTTP Error: ${response.status}`;
+            } else {
+                errorMessage = await response.text() || `HTTP Error: ${response.status}`;
+            }
+            throw new Error(errorMessage);
         }
 
         if (!response.headers.get('content-type')?.includes('text/event-stream')) {
@@ -113,10 +120,8 @@ form.addEventListener('submit', async (e) => {
         } else {
             chatHistory.push(`Vincent Venice: ${content}`);
             if (!isVerified && token) {
-                isVerified = true; // Mark as verified after first successful response
-                if (typeof turnstile !== 'undefined') {
-                    turnstile.reset('.cf-turnstile'); // Reset widget after successful verification
-                }
+                isVerified = true; // Mark as verified after first success
+                turnstileWidget.style.display = 'none'; // Hide Turnstile widget
             }
         }
 
