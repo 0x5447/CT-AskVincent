@@ -31,7 +31,6 @@
                 </div>
             </div>
             <div class="chat-controls">
-                <button class="download-btn" onclick="downloadChat()">Download Chat</button>
                 <div class="suggested-prompts" id="suggested-prompts">
                     <button onclick="usePrompt('Tell me a joke')">Tell me a joke</button>
                     <button onclick="usePrompt('What’s the weather like today?')">Check the weather</button>
@@ -39,6 +38,7 @@
                 </div>
             </div>
             <form class="chat-footer" id="chat-form">
+                <button class="download-btn" onclick="downloadChat()">Download Chat</button>
                 <textarea id="input" placeholder="What’s on your mind? Let’s explore it together..." rows="1" autocomplete="off" required></textarea>
                 <div class="cf-turnstile" data-sitekey="0x4AAAAAAA_CsY1Tr0uuxaor"></div>
                 <button type="submit" class="ask-btn">Ask</button>
