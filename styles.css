@@ -14,6 +14,7 @@ body {
     background-position: center;
     background-color: #f0f2f5;
     transition: background-image 1s ease-in-out;
+    position: relative; /* Ensure body is a stacking context */
 }
 
 .background-overlay {
@@ -23,7 +24,8 @@ body {
     width: 100%;
     height: 100%;
     background: linear-gradient(45deg, rgba(255, 255, 255, 0.6), rgba(245, 247, 250, 0.6));
-    z-index: 0;
+    z-index: -1; /* Behind everything */
+    pointer-events: none; /* Allow clicks to pass through */
 }
 
 /* Header and Navigation */
@@ -32,7 +34,7 @@ header {
     top: 0;
     width: 100%;
     background: #1a1a1a;
-    z-index: 2;
+    z-index: 10; /* Above overlay */
 }
 
 .main-nav {
@@ -76,6 +78,8 @@ header {
     flex-direction: column;
     height: 85vh;
     margin: 20px;
+    position: relative;
+    z-index: 1; /* Above overlay */
 }
 
 .chat-header {
@@ -366,7 +370,7 @@ header {
 
 /* Content Page Specific Styles */
 .content-page {
-    padding-top: 80px; /* Offset for fixed header */
+    padding-top: 80px;
     padding-bottom: 2rem;
     min-height: 100vh;
     display: flex;
@@ -381,6 +385,8 @@ header {
     padding: 2rem;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     margin: 20px;
+    position: relative;
+    z-index: 1; /* Above overlay */
 }
 
 .content-section h1 {
