@@ -27,7 +27,6 @@ let chatHistory = [];
 let lastMessageTime = 0;
 const RATE_LIMIT_MS = 3000; // 3 seconds
 let isVerified = false;
-let isProcessing = false; // Track if a message is being processed
 
 if (form && input && chatbox) {
     form.addEventListener('submit', async (e) => {
@@ -36,28 +35,28 @@ if (form && input && chatbox) {
         if (!userMessage) return;
 
         const now = Date.now();
-        console.log('Submit attempt:', { now, lastMessageTime, diff: now - lastMessageTime, isProcessing });
+        console.log('Submit attempt:', { now, lastMessageTime, diff: now - lastMessageTime });
 
-        if (isProcessing || (now - lastMessageTime < RATE_LIMIT_MS)) {
+        if (now - lastMessageTime < RATE_LIMIT_MS) {
             addMessage('bot', '⚠️ Please wait a few seconds before sending another message.');
             console.log('Rate limit triggered');
             return;
         }
 
-        isProcessing = true;
         lastMessageTime = now;
         addMessage('user', userMessage);
         chatHistory.push({ sender: 'You', content: userMessage, timestamp: now });
         input.value = '';
         const submitButton = form.querySelector('button');
-        submitButton.disabled = true;
+        if (submitButton) submitButton.disabled = true;
+        console.log('Button disabled, processing started');
 
         const loadingMessage = addMessage('bot', '<span class="loading-dots"></span>', true);
 
         try {
             let token = null;
             if (!isVerified) {
-                token = turnstileWidget.getAttribute('data-response') || 
+                token = turnstileWidget?.getAttribute('data-response') || 
                         (typeof turnstile !== 'undefined' ? await turnstile.getResponse('.cf-turnstile') : null);
 
                 if (!token) {
@@ -142,24 +141,25 @@ if (form && input && chatbox) {
 
             if (!isVerified && token) {
                 isVerified = true;
-                turnstileWidget.style.display = 'none';
+                if (turnstileWidget) turnstileWidget.style.display = 'none';
             }
         } catch (error) {
             updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
             chatHistory.push({ sender: 'Bot', content: `Error: ${error.message}`, timestamp: Date.now() });
             console.error('Submission error:', error);
         } finally {
-            isProcessing = false;
-            submitButton.disabled = false;
-            input.focus();
+            if (submitButton) submitButton.disabled = false;
             console.log('Processing complete, button enabled');
+            input.focus();
         }
     });
 
+    // Fix Enter key submission
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            form.dispatchEvent(new Event('submit'));
+            console.log('Enter key pressed, submitting form');
+            form.requestSubmit(); // Use requestSubmit to trigger form's submit event
         }
     });
 }
@@ -181,7 +181,7 @@ function addMessage(sender, text, isHTML = false) {
         isHTML ? content.innerHTML = text : content.textContent = text;
         div.appendChild(content);
     } else {
-        isHTML ? div.innerHTML = text : content.textContent = text;
+        div.textContent = text; // Fixed typo from content.textContent
     }
 
     chatbox.appendChild(div);
@@ -310,6 +310,6 @@ function downloadChat() {
 function usePrompt(text) {
     if (input) {
         input.value = text;
-        form.dispatchEvent(new Event('submit'));
+        form.requestSubmit();
     }
 }
