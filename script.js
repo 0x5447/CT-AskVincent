@@ -90,7 +90,7 @@ if (form && input && chatbox) {
                     const { done, value } = await reader.read();
                     if (done) {
                         if (!content.trim()) {
-                            updateMessage(loadingMessage, '⚠️ No response received');
+                            updateMessage(loadingMessage, '⚠️ No response received from server');
                             chatHistory.push({ sender: 'Bot', content: 'No response received', timestamp: Date.now() });
                         } else {
                             updateMessage(loadingMessage, formatText(content));
@@ -105,13 +105,14 @@ if (form && input && chatbox) {
 
                     for (const event of events) {
                         if (!event.trim()) continue;
+                        console.log('Raw event:', event); // Debug each chunk
                         const dataLine = event.split('\n').find(line => line.startsWith('data:'));
                         if (!dataLine || dataLine === 'data: [DONE]') continue;
 
-                        console.log('Raw chunk:', dataLine); // Debug raw data
                         try {
                             const data = JSON.parse(dataLine.slice(5));
-                            if (data.choices && data.choices[0]?.delta?.content) {
+                            console.log('Parsed data:', data); // Debug parsed JSON
+                            if (data.choices?.[0]?.delta?.content) {
                                 content += data.choices[0].delta.content;
                                 updateMessage(loadingMessage, formatText(content));
                                 if (loadingMessage.querySelector('.loading-dots')) {
@@ -120,11 +121,6 @@ if (form && input && chatbox) {
                             }
                         } catch (e) {
                             console.error('Parse error:', e, 'Raw data:', dataLine);
-                            // Fallback: treat as plain text if JSON fails
-                            if (dataLine.slice(5).trim()) {
-                                content += dataLine.slice(5) + '\n';
-                                updateMessage(loadingMessage, formatText(content));
-                            }
                         }
                     }
                 }
@@ -176,7 +172,7 @@ function addMessage(sender, text, isHTML = false) {
         isHTML ? content.innerHTML = text : content.textContent = text;
         div.appendChild(content);
     } else {
-        isHTML ? div.innerHTML = text : div.textContent = text;
+        isHTML ? div.innerHTML = text : content.textContent = text;
     }
 
     chatbox.appendChild(div);
