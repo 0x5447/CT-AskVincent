@@ -25,7 +25,7 @@ const chatbox = document.getElementById('chatbox');
 const turnstileWidget = document.querySelector('.cf-turnstile');
 let chatHistory = [];
 let lastMessageTime = 0;
-const RATE_LIMIT_MS = 3000; // 3 seconds
+const RATE_LIMIT_MS = 3000;
 let isVerified = false;
 
 if (form && input && chatbox) {
@@ -35,28 +35,23 @@ if (form && input && chatbox) {
         if (!userMessage) return;
 
         const now = Date.now();
-        console.log('Submit attempt:', { now, lastMessageTime, diff: now - lastMessageTime });
-
         if (now - lastMessageTime < RATE_LIMIT_MS) {
             addMessage('bot', '⚠️ Please wait a few seconds before sending another message.');
-            console.log('Rate limit triggered');
             return;
         }
-
         lastMessageTime = now;
+
         addMessage('user', userMessage);
-        chatHistory.push({ sender: 'You', content: userMessage, timestamp: now });
+        chatHistory.push(`You: ${userMessage}`);
         input.value = '';
-        const submitButton = form.querySelector('button');
-        if (submitButton) submitButton.disabled = true;
-        console.log('Button disabled, processing started');
+        form.querySelector('button').disabled = true;
 
         const loadingMessage = addMessage('bot', '<span class="loading-dots"></span>', true);
 
         try {
             let token = null;
             if (!isVerified) {
-                token = turnstileWidget?.getAttribute('data-response') || 
+                token = turnstileWidget.getAttribute('data-response') || 
                         (typeof turnstile !== 'undefined' ? await turnstile.getResponse('.cf-turnstile') : null);
 
                 if (!token) {
@@ -68,7 +63,6 @@ if (form && input && chatbox) {
                 ? `${WORKER_URL}?query=${encodeURIComponent(userMessage)}` 
                 : `${WORKER_URL}?query=${encodeURIComponent(userMessage)}&cfToken=${encodeURIComponent(token)}`;
 
-            console.log('Fetching:', url);
             const response = await fetch(url, {
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -94,72 +88,62 @@ if (form && input && chatbox) {
 
                 while (true) {
                     const { done, value } = await reader.read();
-                    if (done) {
-                        if (!content.trim()) {
-                            updateMessage(loadingMessage, '⚠️ No response received from server');
-                            chatHistory.push({ sender: 'Bot', content: 'No response received', timestamp: Date.now() });
-                        } else {
-                            updateMessage(loadingMessage, formatText(content));
-                            chatHistory.push({ sender: 'Bot', content: content.trim(), timestamp: Date.now() });
-                        }
-                        break;
-                    }
+                    if (done) break;
 
                     buffer += decoder.decode(value, { stream: true });
                     const events = buffer.split('\n\n');
                     buffer = events.pop();
 
                     for (const event of events) {
-                        if (!event.trim()) continue;
-                        console.log('Raw event:', event);
                         const dataLine = event.split('\n').find(line => line.startsWith('data:'));
-                        if (!dataLine || dataLine === 'data: [DONE]') continue;
+                        if (!dataLine) continue;
 
                         try {
                             const data = JSON.parse(dataLine.slice(5));
-                            console.log('Parsed data:', data);
                             if (data.choices?.[0]?.delta?.content) {
                                 content += data.choices[0].delta.content;
                                 updateMessage(loadingMessage, formatText(content));
-                                if (loadingMessage.querySelector('.loading-dots')) {
+                                if (content && loadingMessage.querySelector('.loading-dots')) {
                                     loadingMessage.querySelector('.loading-dots').remove();
                                 }
                             }
                         } catch (e) {
-                            console.error('Parse error:', e, 'Raw data:', dataLine);
+                            console.error('Parse error:', e);
                         }
                     }
+                }
+
+                if (!content) {
+                    updateMessage(loadingMessage, '⚠️ No response received');
+                } else {
+                    chatHistory.push(`Vincent Venice: ${content}`);
                 }
             } else if (contentType?.includes('application/json')) {
                 const data = await response.json();
                 const content = data.reply || 'No reply provided';
                 updateMessage(loadingMessage, formatText(content));
-                chatHistory.push({ sender: 'Bot', content, timestamp: Date.now() });
+                chatHistory.push(`Vincent Venice: ${content}`);
             } else {
                 throw new Error('Unexpected response format');
             }
 
             if (!isVerified && token) {
                 isVerified = true;
-                if (turnstileWidget) turnstileWidget.style.display = 'none';
+                turnstileWidget.style.display = 'none';
             }
         } catch (error) {
             updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
-            chatHistory.push({ sender: 'Bot', content: `Error: ${error.message}`, timestamp: Date.now() });
             console.error('Submission error:', error);
         } finally {
-            if (submitButton) submitButton.disabled = false;
-            console.log('Processing complete, button enabled');
+            form.querySelector('button').disabled = false;
             input.focus();
         }
     });
 
-    // Fix Enter key submission
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            console.log('Enter key pressed, submitting form');
-            form.requestSubmit(); // Use requestSubmit to trigger form's submit event
+            form.dispatchEvent(new Event('submit'));
         }
     });
 }
@@ -181,7 +165,7 @@ function addMessage(sender, text, isHTML = false) {
         isHTML ? content.innerHTML = text : content.textContent = text;
         div.appendChild(content);
     } else {
-        div.textContent = text; // Fixed typo from content.textContent
+        isHTML ? div.innerHTML = text : div.textContent = text;
     }
 
     chatbox.appendChild(div);
@@ -296,20 +280,16 @@ function downloadChat() {
         alert('No chat history to download yet!');
         return;
     }
-    const formattedChat = chatHistory.map(entry => {
-        const date = new Date(entry.timestamp);
-        return `[${date.toLocaleString()}] ${entry.sender}: ${entry.content}`;
-    }).join('\n\n');
-    const blob = new Blob([`Connecticut Vacation Guide Chat Log\nGenerated: ${new Date().toLocaleString()}\n\n${formattedChat}`], { type: 'text/plain' });
+    const blob = new Blob([chatHistory.join('\n')], { type: 'text/plain' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'ct_vacation_chat_log.txt';
+    link.download = 'venice_chat_history.txt';
     link.click();
 }
 
 function usePrompt(text) {
     if (input) {
         input.value = text;
-        form.requestSubmit();
+        form.dispatchEvent(new Event('submit'));
     }
 }
