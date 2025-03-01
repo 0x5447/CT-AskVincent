@@ -101,8 +101,8 @@ if (form && input && chatbox) {
                         try {
                             const data = JSON.parse(dataLine.slice(5));
                             if (data.choices?.[0]?.delta?.content) {
-                                content = data.choices[0].delta.content; // Overwrite with final content including button
-                                updateMessage(loadingMessage, content); // Render HTML directly
+                                content = data.choices[0].delta.content;
+                                updateMessage(loadingMessage, content); // Render HTML with button for VCU
                                 if (loadingMessage.querySelector('.loading-dots')) {
                                     loadingMessage.querySelector('.loading-dots').remove();
                                 }
@@ -116,7 +116,7 @@ if (form && input && chatbox) {
                 if (!content) {
                     updateMessage(loadingMessage, '⚠️ No response received');
                 } else {
-                    chatHistory.push(`Vincent Venice: ${content.replace(/<button.*<\/script>/g, '')}`); // Strip HTML for history
+                    chatHistory.push(`Vincent Venice: ${content.replace(/<button.*<\/script>/g, '')}`);
                 }
             } else if (contentType?.includes('application/json')) {
                 const data = await response.json();
