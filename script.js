@@ -25,8 +25,9 @@ const chatbox = document.getElementById('chatbox');
 const turnstileWidget = document.querySelector('.cf-turnstile');
 let chatHistory = [];
 let lastMessageTime = 0;
-const RATE_LIMIT_MS = 3000;
+const RATE_LIMIT_MS = 3000; // 3 seconds
 let isVerified = false;
+let isProcessing = false; // Track if a message is being processed
 
 if (form && input && chatbox) {
     form.addEventListener('submit', async (e) => {
@@ -35,16 +36,21 @@ if (form && input && chatbox) {
         if (!userMessage) return;
 
         const now = Date.now();
-        if (now - lastMessageTime < RATE_LIMIT_MS) {
+        console.log('Submit attempt:', { now, lastMessageTime, diff: now - lastMessageTime, isProcessing });
+
+        if (isProcessing || (now - lastMessageTime < RATE_LIMIT_MS)) {
             addMessage('bot', '⚠️ Please wait a few seconds before sending another message.');
+            console.log('Rate limit triggered');
             return;
         }
-        lastMessageTime = now;
 
+        isProcessing = true;
+        lastMessageTime = now;
         addMessage('user', userMessage);
         chatHistory.push({ sender: 'You', content: userMessage, timestamp: now });
         input.value = '';
-        form.querySelector('button').disabled = true;
+        const submitButton = form.querySelector('button');
+        submitButton.disabled = true;
 
         const loadingMessage = addMessage('bot', '<span class="loading-dots"></span>', true);
 
@@ -63,6 +69,7 @@ if (form && input && chatbox) {
                 ? `${WORKER_URL}?query=${encodeURIComponent(userMessage)}` 
                 : `${WORKER_URL}?query=${encodeURIComponent(userMessage)}&cfToken=${encodeURIComponent(token)}`;
 
+            console.log('Fetching:', url);
             const response = await fetch(url, {
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -105,13 +112,13 @@ if (form && input && chatbox) {
 
                     for (const event of events) {
                         if (!event.trim()) continue;
-                        console.log('Raw event:', event); // Debug each chunk
+                        console.log('Raw event:', event);
                         const dataLine = event.split('\n').find(line => line.startsWith('data:'));
                         if (!dataLine || dataLine === 'data: [DONE]') continue;
 
                         try {
                             const data = JSON.parse(dataLine.slice(5));
-                            console.log('Parsed data:', data); // Debug parsed JSON
+                            console.log('Parsed data:', data);
                             if (data.choices?.[0]?.delta?.content) {
                                 content += data.choices[0].delta.content;
                                 updateMessage(loadingMessage, formatText(content));
@@ -142,8 +149,10 @@ if (form && input && chatbox) {
             chatHistory.push({ sender: 'Bot', content: `Error: ${error.message}`, timestamp: Date.now() });
             console.error('Submission error:', error);
         } finally {
-            form.querySelector('button').disabled = false;
+            isProcessing = false;
+            submitButton.disabled = false;
             input.focus();
+            console.log('Processing complete, button enabled');
         }
     });
 
