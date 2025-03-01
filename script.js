@@ -88,7 +88,16 @@ if (form && input && chatbox) {
 
                 while (true) {
                     const { done, value } = await reader.read();
-                    if (done) break;
+                    if (done) {
+                        if (!content) {
+                            updateMessage(loadingMessage, '⚠️ No response received');
+                            chatHistory.push({ sender: 'Bot', content: 'No response received', timestamp: Date.now() });
+                        } else {
+                            updateMessage(loadingMessage, formatText(content));
+                            chatHistory.push({ sender: 'Bot', content, timestamp: Date.now() });
+                        }
+                        break;
+                    }
 
                     buffer += decoder.decode(value, { stream: true });
                     const events = buffer.split('\n\n');
@@ -101,7 +110,7 @@ if (form && input && chatbox) {
                         try {
                             const data = JSON.parse(dataLine.slice(5));
                             if (data.choices?.[0]?.delta?.content) {
-                                content += data.choices[0].delta.content; // Accumulate content
+                                content += data.choices[0].delta.content;
                                 updateMessage(loadingMessage, formatText(content));
                                 if (loadingMessage.querySelector('.loading-dots')) {
                                     loadingMessage.querySelector('.loading-dots').remove();
@@ -111,14 +120,6 @@ if (form && input && chatbox) {
                             console.error('Parse error:', e, 'Raw data:', dataLine);
                         }
                     }
-                }
-
-                if (!content) {
-                    updateMessage(loadingMessage, '⚠️ No response received');
-                    chatHistory.push({ sender: 'Bot', content: 'No response received', timestamp: Date.now() });
-                } else {
-                    updateMessage(loadingMessage, formatText(content)); // Final update
-                    chatHistory.push({ sender: 'Bot', content, timestamp: Date.now() });
                 }
             } else if (contentType?.includes('application/json')) {
                 const data = await response.json();
