@@ -42,7 +42,7 @@ if (form && input && chatbox) {
         lastMessageTime = now;
 
         addMessage('user', userMessage);
-        chatHistory.push(`You: ${userMessage}`);
+        chatHistory.push({ sender: 'You', content: userMessage, timestamp: now });
         input.value = '';
         form.querySelector('button').disabled = true;
 
@@ -101,8 +101,8 @@ if (form && input && chatbox) {
                         try {
                             const data = JSON.parse(dataLine.slice(5));
                             if (data.choices?.[0]?.delta?.content) {
-                                content = data.choices[0].delta.content;
-                                updateMessage(loadingMessage, content); // Render HTML with button for VCU
+                                content += data.choices[0].delta.content;
+                                updateMessage(loadingMessage, formatText(content));
                                 if (loadingMessage.querySelector('.loading-dots')) {
                                     loadingMessage.querySelector('.loading-dots').remove();
                                 }
@@ -115,14 +115,15 @@ if (form && input && chatbox) {
 
                 if (!content) {
                     updateMessage(loadingMessage, '⚠️ No response received');
+                    chatHistory.push({ sender: 'Bot', content: 'No response received', timestamp: Date.now() });
                 } else {
-                    chatHistory.push(`Vincent Venice: ${content.replace(/<button.*<\/script>/g, '')}`);
+                    chatHistory.push({ sender: 'Bot', content, timestamp: Date.now() });
                 }
             } else if (contentType?.includes('application/json')) {
                 const data = await response.json();
                 const content = data.reply || 'No reply provided';
                 updateMessage(loadingMessage, formatText(content));
-                chatHistory.push(`Vincent Venice: ${content}`);
+                chatHistory.push({ sender: 'Bot', content, timestamp: Date.now() });
             } else {
                 throw new Error('Unexpected response format');
             }
@@ -133,6 +134,7 @@ if (form && input && chatbox) {
             }
         } catch (error) {
             updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
+            chatHistory.push({ sender: 'Bot', content: `Error: ${error.message}`, timestamp: Date.now() });
             console.error('Submission error:', error);
         } finally {
             form.querySelector('button').disabled = false;
@@ -280,10 +282,14 @@ function downloadChat() {
         alert('No chat history to download yet!');
         return;
     }
-    const blob = new Blob([chatHistory.join('\n')], { type: 'text/plain' });
+    const formattedChat = chatHistory.map(entry => {
+        const date = new Date(entry.timestamp);
+        return `[${date.toLocaleString()}] ${entry.sender}: ${entry.content}`;
+    }).join('\n\n');
+    const blob = new Blob([`Connecticut Vacation Guide Chat Log\nGenerated: ${new Date().toLocaleString()}\n\n${formattedChat}`], { type: 'text/plain' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'venice_chat_history.txt';
+    link.download = 'ct_vacation_chat_log.txt';
     link.click();
 }
 
