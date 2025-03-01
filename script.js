@@ -96,14 +96,14 @@ if (form && input && chatbox) {
 
                     for (const event of events) {
                         const dataLine = event.split('\n').find(line => line.startsWith('data:'));
-                        if (!dataLine) continue;
+                        if (!dataLine || dataLine === 'data: [DONE]') continue;
 
                         try {
                             const data = JSON.parse(dataLine.slice(5));
                             if (data.choices?.[0]?.delta?.content) {
-                                content += data.choices[0].delta.content;
-                                updateMessage(loadingMessage, formatText(content));
-                                if (content && loadingMessage.querySelector('.loading-dots')) {
+                                content = data.choices[0].delta.content; // Overwrite with final content including button
+                                updateMessage(loadingMessage, content); // Render HTML directly
+                                if (loadingMessage.querySelector('.loading-dots')) {
                                     loadingMessage.querySelector('.loading-dots').remove();
                                 }
                             }
@@ -116,7 +116,7 @@ if (form && input && chatbox) {
                 if (!content) {
                     updateMessage(loadingMessage, '⚠️ No response received');
                 } else {
-                    chatHistory.push(`Vincent Venice: ${content}`);
+                    chatHistory.push(`Vincent Venice: ${content.replace(/<button.*<\/script>/g, '')}`); // Strip HTML for history
                 }
             } else if (contentType?.includes('application/json')) {
                 const data = await response.json();
