@@ -89,12 +89,12 @@ if (form && input && chatbox) {
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) {
-                        if (!content) {
+                        if (!content.trim()) {
                             updateMessage(loadingMessage, '⚠️ No response received');
                             chatHistory.push({ sender: 'Bot', content: 'No response received', timestamp: Date.now() });
                         } else {
                             updateMessage(loadingMessage, formatText(content));
-                            chatHistory.push({ sender: 'Bot', content, timestamp: Date.now() });
+                            chatHistory.push({ sender: 'Bot', content: content.trim(), timestamp: Date.now() });
                         }
                         break;
                     }
@@ -104,12 +104,14 @@ if (form && input && chatbox) {
                     buffer = events.pop();
 
                     for (const event of events) {
+                        if (!event.trim()) continue;
                         const dataLine = event.split('\n').find(line => line.startsWith('data:'));
                         if (!dataLine || dataLine === 'data: [DONE]') continue;
 
+                        console.log('Raw chunk:', dataLine); // Debug raw data
                         try {
                             const data = JSON.parse(dataLine.slice(5));
-                            if (data.choices?.[0]?.delta?.content) {
+                            if (data.choices && data.choices[0]?.delta?.content) {
                                 content += data.choices[0].delta.content;
                                 updateMessage(loadingMessage, formatText(content));
                                 if (loadingMessage.querySelector('.loading-dots')) {
@@ -118,6 +120,11 @@ if (form && input && chatbox) {
                             }
                         } catch (e) {
                             console.error('Parse error:', e, 'Raw data:', dataLine);
+                            // Fallback: treat as plain text if JSON fails
+                            if (dataLine.slice(5).trim()) {
+                                content += dataLine.slice(5) + '\n';
+                                updateMessage(loadingMessage, formatText(content));
+                            }
                         }
                     }
                 }
