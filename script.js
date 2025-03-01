@@ -101,14 +101,14 @@ if (form && input && chatbox) {
                         try {
                             const data = JSON.parse(dataLine.slice(5));
                             if (data.choices?.[0]?.delta?.content) {
-                                content += data.choices[0].delta.content;
+                                content += data.choices[0].delta.content; // Accumulate content
                                 updateMessage(loadingMessage, formatText(content));
                                 if (loadingMessage.querySelector('.loading-dots')) {
                                     loadingMessage.querySelector('.loading-dots').remove();
                                 }
                             }
                         } catch (e) {
-                            console.error('Parse error:', e);
+                            console.error('Parse error:', e, 'Raw data:', dataLine);
                         }
                     }
                 }
@@ -117,6 +117,7 @@ if (form && input && chatbox) {
                     updateMessage(loadingMessage, '⚠️ No response received');
                     chatHistory.push({ sender: 'Bot', content: 'No response received', timestamp: Date.now() });
                 } else {
+                    updateMessage(loadingMessage, formatText(content)); // Final update
                     chatHistory.push({ sender: 'Bot', content, timestamp: Date.now() });
                 }
             } else if (contentType?.includes('application/json')) {
