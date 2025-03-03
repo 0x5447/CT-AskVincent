@@ -31,13 +31,15 @@
                 </div>
             </section>
             <section class="chat-input-area">
-                <div class="suggested-prompts" id="suggested-prompts"></div>
+                <div class="suggested-prompts" id="suggested-prompts">
+                    <!-- Prompts populated by JS -->
+                    <button class="download-btn" onclick="downloadChat()">Save Chat</button>
+                </div>
                 <form id="chat-form" class="chat-form">
                     <textarea id="input" placeholder="Ask about Connecticut..." rows="1" autocomplete="off" required></textarea>
                     <div class="cf-turnstile" data-sitekey="0x4AAAAAAA_CsY1Tr0uuxaor"></div>
                     <button type="submit" class="ask-btn">Ask Me</button>
                 </form>
-                <button class="download-btn" onclick="downloadChat()">Save Chat</button>
             </section>
         </div>
     </main>
