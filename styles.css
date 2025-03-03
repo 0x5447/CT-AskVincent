@@ -123,10 +123,12 @@ body {
 }
 
 .bot-icon {
-    width: 32px;
-    height: 32px;
+    width: 20px; /* Smaller, modern size for mobile */
+    height: 20px;
     border-radius: 50%;
-    margin-right: 0.75rem;
+    margin-right: 0.5rem; /* Reduced from 0.75rem to save space */
+    flex-shrink: 0; /* Prevents distortion */
+    object-fit: cover; /* Ensures clean scaling */
 }
 
 .message-content {
@@ -315,7 +317,7 @@ body {
     font-family: 'Courier New', monospace;
     color: #FF6600;
     font-size: 0.95rem;
-    word-break: break-all; /* Prevents overflow on mobile */
+    word-break: break-all;
 }
 
 .formcan-embed iframe {
@@ -357,6 +359,12 @@ body {
 
     .chat-title p {
         font-size: 1rem;
+    }
+
+    .bot-icon {
+        width: 24px; /* Slightly larger for desktop */
+        height: 24px;
+        margin-right: 0.75rem; /* Back to original spacing */
     }
 
     .suggested-prompts button {
