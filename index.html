@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ask Vincent CT</title>
+    <title>Ask Vincent CT Guide</title>
     <link rel="stylesheet" href="/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
@@ -12,22 +12,22 @@
     <div class="background-overlay"></div>
     <header class="nav-header">
         <nav class="main-nav">
-    <a href="/index.html" class="nav-active">Ask Vincent</a>
-    <a href="/about.html">About</a>
-    <a href="/support.html">Support</a>
-    <a href="/contact.html">Contact</a>
+            <a href="/index.html" class="nav-active">Ask Vincent</a>
+            <a href="/about.html">About</a>
+            <a href="/donate.html">Donate</a>
+            <a href="/contact.html">Contact</a>
         </nav>
     </header>
     <main class="chat-main">
         <div class="chat-wrapper">
-            <div class="chat-title">
-    <h1>Welcome</h1>
-    <p>I am Vincent your private AI guide to Connecticut. Ask me anything!</p>
+            <div class="chat-title" id="chat-title">
+                <h1>Welcome</h1>
+                <p>I am Vincent your private AI guide to Connecticut. Ask me anything!</p>
             </div>
             <section class="chat-messages" id="chatbox">
                 <div class="message bot">
-                    <img src="https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/icon.png" alt="Vincent Icon" class="bot-icon">
-                    <div class="message-content">Hey, I’m Vincent! How can I help you explore?</div>
+                    <img src="YOUR_NEW_ICON_URL" alt="Vincent Icon" class="bot-icon">
+                    <div class="message-content">Hey, I’m Vincent! What Connecticut fun can I unlock for you today?</div>
                 </div>
             </section>
             <section class="chat-input-area">
@@ -36,7 +36,7 @@
                     <button class="download-btn" onclick="downloadChat()">Save Chat</button>
                 </div>
                 <form id="chat-form" class="chat-form">
-                    <textarea id="input" placeholder="How May I Help?" rows="1" autocomplete="off" required></textarea>
+                    <textarea id="input" placeholder="How Can I Guide Your Connecticut Journey?" rows="1" autocomplete="off" required></textarea>
                     <div class="cf-turnstile" data-sitekey="0x4AAAAAAA_CsY1Tr0uuxaor"></div>
                     <button type="submit" class="ask-btn">Ask Me</button>
                 </form>
