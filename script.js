@@ -222,7 +222,7 @@ function addMessage(sender, text, isHTML = false) {
 
     if (sender === 'bot') {
         const icon = document.createElement('img');
-        icon.src = 'YOUR_NEW_ICON_URL'; // Replace with your actual icon URL
+        icon.src = 'https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/icon.png'; // Fixed URL
         icon.alt = 'Vincent Icon';
         icon.className = 'bot-icon';
         div.appendChild(icon);
