@@ -5,6 +5,16 @@ const BACKGROUND_IMAGES = [
     'https://raw.githubusercontent.com/0xTG/venice-mso/main/VeniceAI_jXw0mwJ.webp',
     'https://raw.githubusercontent.com/0xTG/venice-mso/main/VeniceAI_sFkAxgA.webp'
 ];
+const SUGGESTED_PROMPTS = [
+    "What’s the best pizza in Hartford?",
+    "Top parks near Bristol?",
+    "Fun things to do in New Haven?",
+    "Where’s the best seafood in Mystic?",
+    "Hidden gems in Connecticut?",
+    "Best hiking trails near Stamford?",
+    "What’s on in Hartford this weekend?",
+    "Cool museums in Connecticut?"
+];
 
 BACKGROUND_IMAGES.forEach(url => new Image().src = url);
 
@@ -27,7 +37,7 @@ let chatHistory = [];
 let lastMessageTime = 0;
 const RATE_LIMIT_MS = 3000;
 let isVerified = false;
-let isFirstMessage = true; // Track first submission
+let isFirstMessage = true;
 
 if (form && input && chatbox) {
     form.addEventListener('submit', async (e) => {
@@ -48,7 +58,6 @@ if (form && input && chatbox) {
         input.value = '';
         form.querySelector('.ask-btn').disabled = true;
 
-        // Hide title after first message
         if (isFirstMessage && chatTitle) {
             chatTitle.classList.add('hidden');
             isFirstMessage = false;
@@ -177,7 +186,10 @@ function rotateSuggestedPrompt() {
 
 function initializeSuggestedPrompt() {
     const container = document.getElementById('suggested-prompts');
-    if (!container) return;
+    if (!container) {
+        console.error('Suggested prompts container not found!');
+        return;
+    }
 
     container.innerHTML = '';
     const promptButton = document.createElement('button');
@@ -194,9 +206,12 @@ function initializeSuggestedPrompt() {
     setInterval(rotateSuggestedPrompt, 3000);
 }
 
+// Ensure initialization runs
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('suggested-prompts')) {
         initializeSuggestedPrompt();
+    } else {
+        console.error('No #suggested-prompts element found on page load!');
     }
 });
 
@@ -207,7 +222,7 @@ function addMessage(sender, text, isHTML = false) {
 
     if (sender === 'bot') {
         const icon = document.createElement('img');
-        icon.src = 'YOUR_NEW_ICON_URL'; // Update with your new icon when ready
+        icon.src = 'YOUR_NEW_ICON_URL'; // Replace with your actual icon URL
         icon.alt = 'Vincent Icon';
         icon.className = 'bot-icon';
         div.appendChild(icon);
