@@ -360,7 +360,7 @@ body {
         width: 100%; /* Reset to 100% for desktop */
         max-width: 800px; /* Constrain width on desktop */
         margin: 0 auto; /* Center it */
-        border-radius: 12px; /* Restore rounded corners */
+        border-radius: 0px; /* Restore rounded corners */
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Restore shadow */
     }
 
