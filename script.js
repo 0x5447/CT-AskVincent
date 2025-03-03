@@ -159,31 +159,47 @@ if (form && input && chatbox) {
     });
 }
 
-// Dynamic Suggested Prompts
-function updateSuggestedPrompts() {
+// Single Rotating Suggested Prompt
+function rotateSuggestedPrompt() {
     const container = document.getElementById('suggested-prompts');
     if (!container) return;
+
+    const promptButton = container.querySelector('button:not(.download-btn)');
+    if (!promptButton) return;
+
+    const currentIndex = SUGGESTED_PROMPTS.indexOf(promptButton.textContent);
+    const nextIndex = (currentIndex + 1) % SUGGESTED_PROMPTS.length;
+    
+    promptButton.style.animation = 'fadePrompt 3s ease-in-out';
+    setTimeout(() => {
+        promptButton.textContent = SUGGESTED_PROMPTS[nextIndex];
+        promptButton.onclick = () => usePrompt(SUGGESTED_PROMPTS[nextIndex]);
+        promptButton.style.animation = 'none'; // Reset animation
+    }, 300); // Slight delay for fade-out
+}
+
+function initializeSuggestedPrompt() {
+    const container = document.getElementById('suggested-prompts');
+    if (!container) return;
+
     container.innerHTML = ''; // Clear existing content
-    const shuffled = [...SUGGESTED_PROMPTS].sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, 2);
-    selected.forEach(prompt => {
-        const button = document.createElement('button');
-        button.textContent = prompt;
-        button.onclick = () => usePrompt(prompt);
-        container.appendChild(button);
-    });
-    // Add the Save Chat button back
+    const promptButton = document.createElement('button');
+    promptButton.textContent = SUGGESTED_PROMPTS[0];
+    promptButton.onclick = () => usePrompt(SUGGESTED_PROMPTS[0]);
+    container.appendChild(promptButton);
+
     const saveButton = document.createElement('button');
     saveButton.className = 'download-btn';
     saveButton.textContent = 'Save Chat';
     saveButton.onclick = downloadChat;
     container.appendChild(saveButton);
+
+    setInterval(rotateSuggestedPrompt, 3000); // Rotate every 3 seconds
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('suggested-prompts')) {
-        updateSuggestedPrompts();
-        setInterval(updateSuggestedPrompts, 30000);
+        initializeSuggestedPrompt();
     }
 });
 
