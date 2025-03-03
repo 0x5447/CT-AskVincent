@@ -316,7 +316,6 @@ function downloadChat() {
     const date = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
     const filename = `CT Guide - Saved Chat ${date}.txt`;
     
-    // Prettier format for the saved file
     let formattedChat = '=== Connecticut AI Guide Chat ===\n';
     formattedChat += `Saved on: ${date}\n\n`;
     chatHistory.forEach(entry => {
