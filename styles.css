@@ -137,6 +137,18 @@ body {
     max-width: 85%;
     font-weight: 500;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    word-wrap: break-word; /* Ensures long words don’t overflow */
+}
+
+.message-content ul,
+.message-content ol {
+    padding-left: 1.5rem; /* Indents lists properly */
+    margin: 0.5rem 0; /* Adds breathing room */
+    max-width: 100%; /* Keeps lists within bubble */
+}
+
+.message-content li {
+    margin-bottom: 0.25rem; /* Space between list items */
 }
 
 .message.user {
@@ -267,7 +279,7 @@ body {
     }
 
     .chat-wrapper {
-        max-height: 80vh;
+        max-height: 90vh; /* Increased to allow room for input area */
     }
 
     .chat-title h1 {
