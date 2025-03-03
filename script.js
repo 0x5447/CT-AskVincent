@@ -5,18 +5,7 @@ const BACKGROUND_IMAGES = [
     'https://raw.githubusercontent.com/0xTG/venice-mso/main/VeniceAI_jXw0mwJ.webp',
     'https://raw.githubusercontent.com/0xTG/venice-mso/main/VeniceAI_sFkAxgA.webp'
 ];
-const SUGGESTED_PROMPTS = [
-    "What’s the best pizza in Hartford?",
-    "Top parks near Bristol?",
-    "Fun things to do in New Haven?",
-    "Where’s the best seafood in Mystic?",
-    "Hidden gems in Connecticut?",
-    "Best hiking trails near Stamford?",
-    "What’s on in Hartford this weekend?",
-    "Cool museums in Connecticut?"
-];
 
-// Background System (Preload and Rotate)
 BACKGROUND_IMAGES.forEach(url => new Image().src = url);
 
 function rotateBackground() {
@@ -33,10 +22,12 @@ const form = document.getElementById('chat-form');
 const input = document.getElementById('input');
 const chatbox = document.getElementById('chatbox');
 const turnstileWidget = document.querySelector('.cf-turnstile');
+const chatTitle = document.getElementById('chat-title');
 let chatHistory = [];
 let lastMessageTime = 0;
 const RATE_LIMIT_MS = 3000;
 let isVerified = false;
+let isFirstMessage = true; // Track first submission
 
 if (form && input && chatbox) {
     form.addEventListener('submit', async (e) => {
@@ -56,6 +47,12 @@ if (form && input && chatbox) {
         chatHistory.push({ sender: 'You', message: userMessage, timestamp });
         input.value = '';
         form.querySelector('.ask-btn').disabled = true;
+
+        // Hide title after first message
+        if (isFirstMessage && chatTitle) {
+            chatTitle.classList.add('hidden');
+            isFirstMessage = false;
+        }
 
         const loadingMessage = addMessage('bot', '<span class="loading-dots"></span>', true);
 
@@ -174,15 +171,15 @@ function rotateSuggestedPrompt() {
     setTimeout(() => {
         promptButton.textContent = SUGGESTED_PROMPTS[nextIndex];
         promptButton.onclick = () => usePrompt(SUGGESTED_PROMPTS[nextIndex]);
-        promptButton.style.animation = 'none'; // Reset animation
-    }, 300); // Slight delay for fade-out
+        promptButton.style.animation = 'none';
+    }, 300);
 }
 
 function initializeSuggestedPrompt() {
     const container = document.getElementById('suggested-prompts');
     if (!container) return;
 
-    container.innerHTML = ''; // Clear existing content
+    container.innerHTML = '';
     const promptButton = document.createElement('button');
     promptButton.textContent = SUGGESTED_PROMPTS[0];
     promptButton.onclick = () => usePrompt(SUGGESTED_PROMPTS[0]);
@@ -194,7 +191,7 @@ function initializeSuggestedPrompt() {
     saveButton.onclick = downloadChat;
     container.appendChild(saveButton);
 
-    setInterval(rotateSuggestedPrompt, 3000); // Rotate every 3 seconds
+    setInterval(rotateSuggestedPrompt, 3000);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -210,8 +207,8 @@ function addMessage(sender, text, isHTML = false) {
 
     if (sender === 'bot') {
         const icon = document.createElement('img');
-        icon.src = 'https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/icon.png';
-        icon.alt = 'Bot Icon';
+        icon.src = 'YOUR_NEW_ICON_URL'; // Update with your new icon when ready
+        icon.alt = 'Vincent Icon';
         icon.className = 'bot-icon';
         div.appendChild(icon);
 
