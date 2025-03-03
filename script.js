@@ -10,9 +10,9 @@ const SUGGESTED_PROMPTS = [
     "Top parks near Bristol?",
     "Fun things to do in New Haven?",
     "Where’s the best seafood in Mystic?",
-    "Hidden gems in Connecticut?",
+    "What are the hidden gems in Connecticut?",
     "Best hiking trails near Stamford?",
-    "What’s on in Hartford this weekend?",
+    "What’s happening in Hartford this weekend?",
     "Cool museums in Connecticut?"
 ];
 
@@ -203,7 +203,7 @@ function initializeSuggestedPrompt() {
     saveButton.onclick = downloadChat;
     container.appendChild(saveButton);
 
-    setInterval(rotateSuggestedPrompt, 3000);
+    setInterval(rotateSuggestedPrompt, 4000);
 }
 
 // Ensure initialization runs
