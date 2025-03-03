@@ -227,6 +227,7 @@ body {
     min-height: 48px;
     outline: none;
     transition: border-color 0.2s;
+    font-family: 'Inter', sans-serif; /* Explicitly set */
 }
 
 #input:focus {
