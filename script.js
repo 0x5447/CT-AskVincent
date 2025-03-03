@@ -51,8 +51,9 @@ if (form && input && chatbox) {
         }
         lastMessageTime = now;
 
+        const timestamp = new Date().toLocaleString();
         addMessage('user', userMessage);
-        chatHistory.push(`You: ${userMessage}`);
+        chatHistory.push({ sender: 'You', message: userMessage, timestamp });
         input.value = '';
         form.querySelector('.ask-btn').disabled = true;
 
@@ -126,13 +127,13 @@ if (form && input && chatbox) {
                 if (!content) {
                     updateMessage(loadingMessage, '⚠️ No response received');
                 } else {
-                    chatHistory.push(`Vincent: ${content}`);
+                    chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
                 }
             } else if (contentType?.includes('application/json')) {
                 const data = await response.json();
                 const content = data.reply || 'No reply provided';
                 updateMessage(loadingMessage, formatText(content));
-                chatHistory.push(`Vincent: ${content}`);
+                chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
             } else {
                 throw new Error('Unexpected response format');
             }
@@ -164,7 +165,7 @@ function updateSuggestedPrompts() {
     if (!container) return;
     container.innerHTML = '';
     const shuffled = [...SUGGESTED_PROMPTS].sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, 2); // Show 2 random prompts
+    const selected = shuffled.slice(0, 2);
     selected.forEach(prompt => {
         const button = document.createElement('button');
         button.textContent = prompt;
@@ -176,7 +177,7 @@ function updateSuggestedPrompts() {
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('suggested-prompts')) {
         updateSuggestedPrompts();
-        setInterval(updateSuggestedPrompts, 30000); // Rotate every 30 seconds
+        setInterval(updateSuggestedPrompts, 30000);
     }
 });
 
@@ -314,7 +315,18 @@ function downloadChat() {
     }
     const date = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
     const filename = `CT Guide - Saved Chat ${date}.txt`;
-    const blob = new Blob([chatHistory.join('\n')], { type: 'text/plain' });
+    
+    // Prettier format for the saved file
+    let formattedChat = '=== Connecticut AI Guide Chat ===\n';
+    formattedChat += `Saved on: ${date}\n\n`;
+    chatHistory.forEach(entry => {
+        formattedChat += `[${entry.timestamp}] ${entry.sender}:\n`;
+        formattedChat += `${entry.message}\n`;
+        formattedChat += '------------------------\n\n';
+    });
+    formattedChat += '=== End of Chat ===\n';
+
+    const blob = new Blob([formattedChat], { type: 'text/plain' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = filename;
