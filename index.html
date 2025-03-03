@@ -6,11 +6,11 @@
     <title>Connecticut AI Guide</title>
     <link rel="stylesheet" href="/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
 </head>
 <body>
     <div class="background-overlay"></div>
-    <header>
+    <header class="nav-header">
         <nav class="main-nav">
             <a href="/index.html" class="nav-active">Chat</a>
             <a href="/about.html">About</a>
@@ -18,30 +18,30 @@
             <a href="/contact.html">Contact</a>
         </nav>
     </header>
-    <main class="chat-page">
-        <div class="chat-container">
-            <div class="chat-header">
-                <h1>Welcome</h1>
-                <p>I am your AI guide to explore everything Connecticut. Ask me anything</p>
+    <main class="chat-main">
+        <div class="chat-wrapper">
+            <div class="chat-title">
+                <h1>Hey There!</h1>
+                <p>Your AI buddy for exploring Connecticut. Ask me anything!</p>
             </div>
-            <div class="chat-body" id="chatbox">
+            <section class="chat-messages" id="chatbox">
                 <div class="message bot">
-                    <img src="https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/icon.png" alt="Bot Icon" class="bot-icon">
-                    <div class="message-content">Hi, I am Vincent! Please let me know how I may help.</div>
+                    <img src="https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/icon.png" alt="Vincent Icon" class="bot-icon">
+                    <div class="message-content">Hi, I’m Vincent! How can I help you explore Connecticut today?</div>
                 </div>
-            </div>
-            <div class="chat-controls">
+            </section>
+            <section class="chat-input-area">
                 <div class="suggested-prompts" id="suggested-prompts">
-                    <button onclick="usePrompt('What is the best pizza in Hartford?')">What is the best pizza in Hartford?</button>
-                    <button onclick="usePrompt('What are the best parks around Bristol?')">What are the best parks around Bristol?</button>
+                    <button onclick="usePrompt('What’s the best pizza in Hartford?')">Best Pizza in Hartford</button>
+                    <button onclick="usePrompt('What are the top parks near Bristol?')">Top Parks Near Bristol</button>
                 </div>
-                <button class="download-btn" onclick="downloadChat()">Download Chat</button>
-            </div>
-            <form class="chat-footer" id="chat-form">
-                <textarea id="input" placeholder="What would you like to learn?" rows="1" autocomplete="off" required></textarea>
-                <div class="cf-turnstile" data-sitekey="0x4AAAAAAA_CsY1Tr0uuxaor"></div>
-                <button type="submit" class="ask-btn">Ask</button>
-            </form>
+                <form id="chat-form" class="chat-form">
+                    <textarea id="input" placeholder="Ask about Connecticut..." rows="1" autocomplete="off" required></textarea>
+                    <div class="cf-turnstile" data-sitekey="0x4AAAAAAA_CsY1Tr0uuxaor"></div>
+                    <button type="submit" class="send-btn">Send</button>
+                </form>
+                <button class="download-btn" onclick="downloadChat()">Save Chat</button>
+            </section>
         </div>
     </main>
     <script src="/script.js"></script>
