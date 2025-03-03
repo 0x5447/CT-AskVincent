@@ -61,7 +61,7 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 0 1rem; /* No top padding on mobile */
+    padding: 0 1rem;
 }
 
 .chat-wrapper {
@@ -123,12 +123,12 @@ body {
 }
 
 .bot-icon {
-    width: 20px; /* Smaller, modern size for mobile */
+    width: 20px;
     height: 20px;
     border-radius: 50%;
-    margin-right: 0.5rem; /* Reduced from 0.75rem to save space */
-    flex-shrink: 0; /* Prevents distortion */
-    object-fit: cover; /* Ensures clean scaling */
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+    object-fit: cover;
 }
 
 .message-content {
@@ -328,6 +328,18 @@ body {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* New About Page Icon */
+.about-icon {
+    display: block;
+    width: 64px; /* Larger than chat icon for emphasis */
+    height: 64px;
+    border-radius: 50%;
+    margin: 0 auto 1rem; /* Centered with bottom margin */
+    border: 2px solid #FF6600; /* Orange border to match theme */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    object-fit: cover;
+}
+
 /* Desktop Adjustments */
 @media (min-width: 768px) {
     .nav-header {
@@ -340,7 +352,7 @@ body {
     }
 
     .chat-main {
-         padding: 0 2rem; /* Desktop keeps horizontal padding only */
+        padding: 0 2rem;
     }
 
     .chat-wrapper {
@@ -362,9 +374,9 @@ body {
     }
 
     .bot-icon {
-        width: 24px; /* Slightly larger for desktop */
+        width: 24px;
         height: 24px;
-        margin-right: 0.75rem; /* Back to original spacing */
+        margin-right: 0.75rem;
     }
 
     .suggested-prompts button {
@@ -418,6 +430,11 @@ body {
 
     .content-section p {
         font-size: 1.1rem;
+    }
+
+    .about-icon {
+        width: 80px; /* Larger on desktop */
+        height: 80px;
     }
 }
 
