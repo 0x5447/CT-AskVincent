@@ -68,13 +68,12 @@ body {
     display: flex;
     flex-direction: column;
     height: calc(100vh - 2.5rem);
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
+    width: 100vw; /* Full viewport width on mobile */
+    margin: 0; /* No margins to maximize width */
     background: rgba(255, 255, 255, 0.9);
-    border-radius: 12px;
+    border-radius: 0; /* No rounded corners on mobile for full edge-to-edge */
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: none; /* Remove shadow on mobile since it’s full-width */
 }
 
 .chat-title {
@@ -328,15 +327,15 @@ body {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* New About Page Icon */
+/* About Page Icon */
 .about-icon {
     display: block;
-    width: 64px; /* Larger than chat icon for emphasis */
+    width: 64px;
     height: 64px;
     border-radius: 50%;
-    margin: 0 auto 1rem; /* Centered with bottom margin */
-    border: 2px solid #FF6600; /* Orange border to match theme */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    margin: 0 auto 1rem;
+    border: 2px solid #FF6600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     object-fit: cover;
 }
 
@@ -358,6 +357,11 @@ body {
     .chat-wrapper {
         max-height: 90vh;
         height: auto;
+        width: 100%; /* Reset to 100% for desktop */
+        max-width: 800px; /* Constrain width on desktop */
+        margin: 0 auto; /* Center it */
+        border-radius: 12px; /* Restore rounded corners */
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Restore shadow */
     }
 
     .chat-messages {
@@ -433,7 +437,7 @@ body {
     }
 
     .about-icon {
-        width: 80px; /* Larger on desktop */
+        width: 80px;
         height: 80px;
     }
 }
