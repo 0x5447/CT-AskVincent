@@ -5,8 +5,18 @@ const BACKGROUND_IMAGES = [
     'https://raw.githubusercontent.com/0xTG/venice-mso/main/VeniceAI_jXw0mwJ.webp',
     'https://raw.githubusercontent.com/0xTG/venice-mso/main/VeniceAI_sFkAxgA.webp'
 ];
+const SUGGESTED_PROMPTS = [
+    "What’s the best pizza in Hartford?",
+    "Top parks near Bristol?",
+    "Fun things to do in New Haven?",
+    "Where’s the best seafood in Mystic?",
+    "Hidden gems in Connecticut?",
+    "Best hiking trails near Stamford?",
+    "What’s on in Hartford this weekend?",
+    "Cool museums in Connecticut?"
+];
 
-// Background System (Shared across all pages)
+// Background System (Preload and Rotate)
 BACKGROUND_IMAGES.forEach(url => new Image().src = url);
 
 function rotateBackground() {
@@ -18,7 +28,7 @@ let bgIndex = 0;
 rotateBackground();
 setInterval(rotateBackground, 30000);
 
-// Chat-specific logic (only runs if elements exist)
+// Chat-specific logic
 const form = document.getElementById('chat-form');
 const input = document.getElementById('input');
 const chatbox = document.getElementById('chatbox');
@@ -44,7 +54,7 @@ if (form && input && chatbox) {
         addMessage('user', userMessage);
         chatHistory.push(`You: ${userMessage}`);
         input.value = '';
-        form.querySelector('button').disabled = true;
+        form.querySelector('.ask-btn').disabled = true;
 
         const loadingMessage = addMessage('bot', '<span class="loading-dots"></span>', true);
 
@@ -116,13 +126,13 @@ if (form && input && chatbox) {
                 if (!content) {
                     updateMessage(loadingMessage, '⚠️ No response received');
                 } else {
-                    chatHistory.push(`Vincent Venice: ${content}`);
+                    chatHistory.push(`Vincent: ${content}`);
                 }
             } else if (contentType?.includes('application/json')) {
                 const data = await response.json();
                 const content = data.reply || 'No reply provided';
                 updateMessage(loadingMessage, formatText(content));
-                chatHistory.push(`Vincent Venice: ${content}`);
+                chatHistory.push(`Vincent: ${content}`);
             } else {
                 throw new Error('Unexpected response format');
             }
@@ -135,7 +145,7 @@ if (form && input && chatbox) {
             updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
             console.error('Submission error:', error);
         } finally {
-            form.querySelector('button').disabled = false;
+            form.querySelector('.ask-btn').disabled = false;
             input.focus();
         }
     });
@@ -147,6 +157,28 @@ if (form && input && chatbox) {
         }
     });
 }
+
+// Dynamic Suggested Prompts
+function updateSuggestedPrompts() {
+    const container = document.getElementById('suggested-prompts');
+    if (!container) return;
+    container.innerHTML = '';
+    const shuffled = [...SUGGESTED_PROMPTS].sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 2); // Show 2 random prompts
+    selected.forEach(prompt => {
+        const button = document.createElement('button');
+        button.textContent = prompt;
+        button.onclick = () => usePrompt(prompt);
+        container.appendChild(button);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('suggested-prompts')) {
+        updateSuggestedPrompts();
+        setInterval(updateSuggestedPrompts, 30000); // Rotate every 30 seconds
+    }
+});
 
 // Helper Functions
 function addMessage(sender, text, isHTML = false) {
@@ -280,10 +312,12 @@ function downloadChat() {
         alert('No chat history to download yet!');
         return;
     }
+    const date = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+    const filename = `CT Guide - Saved Chat ${date}.txt`;
     const blob = new Blob([chatHistory.join('\n')], { type: 'text/plain' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'venice_chat_history.txt';
+    link.download = filename;
     link.click();
 }
 
