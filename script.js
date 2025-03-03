@@ -163,7 +163,7 @@ if (form && input && chatbox) {
 function updateSuggestedPrompts() {
     const container = document.getElementById('suggested-prompts');
     if (!container) return;
-    container.innerHTML = '';
+    container.innerHTML = ''; // Clear existing content
     const shuffled = [...SUGGESTED_PROMPTS].sort(() => 0.5 - Math.random());
     const selected = shuffled.slice(0, 2);
     selected.forEach(prompt => {
@@ -172,6 +172,12 @@ function updateSuggestedPrompts() {
         button.onclick = () => usePrompt(prompt);
         container.appendChild(button);
     });
+    // Add the Save Chat button back
+    const saveButton = document.createElement('button');
+    saveButton.className = 'download-btn';
+    saveButton.textContent = 'Save Chat';
+    saveButton.onclick = downloadChat;
+    container.appendChild(saveButton);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
