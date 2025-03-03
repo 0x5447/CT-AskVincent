@@ -61,19 +61,19 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 0; /* No padding on mobile */
+    padding: 0;
 }
 
 .chat-wrapper {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 2.5rem);
-    width: 100vw; /* Full viewport width on mobile */
+    height: calc(100vh - 2.5rem); /* Mobile: Full height minus nav */
+    width: 100vw;
     margin: 0;
     background: rgba(255, 255, 255, 0.9);
-    border-radius: 0; /* No corners on mobile */
+    border-radius: 0;
     overflow: hidden;
-    box-shadow: none; /* No shadow on mobile */
+    box-shadow: none;
 }
 
 .chat-title {
@@ -81,7 +81,7 @@ body {
     color: #fff;
     padding: 1rem;
     text-align: center;
-    transition: opacity 0.3s ease; /* Smooth fade-out */
+    transition: opacity 0.3s ease;
 }
 
 .chat-title.hidden {
@@ -89,7 +89,7 @@ body {
     height: 0;
     padding: 0;
     margin: 0;
-    overflow: hidden; /* Collapses fully */
+    overflow: hidden;
 }
 
 .chat-title h1 {
@@ -108,7 +108,7 @@ body {
     padding: 1rem;
     overflow-y: auto;
     background: #fafafa;
-    max-height: calc(100vh - 12rem);
+    max-height: calc(100vh - 12rem); /* Mobile: Adjusts with title */
 }
 
 .chat-messages::-webkit-scrollbar {
@@ -143,9 +143,9 @@ body {
     background: #fff;
     border: 2px solid #FF6600;
     padding: 0.75rem 1rem;
-    border-radius: 4px;
+    border-radius: 8px;
     max-width: 85%;
-    font-weight: 400;
+    font-weight: 500;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     word-wrap: break-word;
 }
@@ -165,7 +165,7 @@ body {
     background: #1a2d3b;
     color: #fff;
     padding: 0.75rem 1rem;
-    border-radius: 4px;
+    border-radius: 8px;
     max-width: 85%;
     margin-left: auto;
 }
@@ -364,18 +364,20 @@ body {
     }
 
     .chat-wrapper {
-        max-height: 90vh;
-        height: auto;
+        max-height: 90vh; /* Max height constraint */
+        min-height: 650px; /* Fixed min-height to maintain size */
+        height: auto; /* Allows natural growth up to max */
         width: 100%;
         max-width: 800px;
         margin: 0 auto;
-        border-radius: 0px;
+        border-radius: 12px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
     .chat-messages {
-        min-height: 500px;
-        max-height: 60vh;
+        min-height: 500px; /* Keeps a decent chat area */
+        max-height: calc(90vh - 150px); /* Adjusts for title + input */
+        flex: 1; /* Ensures it expands to fill available space */
     }
 
     .chat-title h1 {
