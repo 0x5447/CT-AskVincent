@@ -137,18 +137,18 @@ body {
     max-width: 85%;
     font-weight: 500;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    word-wrap: break-word; /* Ensures long words don’t overflow */
+    word-wrap: break-word;
 }
 
 .message-content ul,
 .message-content ol {
-    padding-left: 1.5rem; /* Indents lists properly */
-    margin: 0.5rem 0; /* Adds breathing room */
-    max-width: 100%; /* Keeps lists within bubble */
+    padding-left: 1.5rem;
+    margin: 0.5rem 0;
+    max-width: 100%;
 }
 
 .message-content li {
-    margin-bottom: 0.25rem; /* Space between list items */
+    margin-bottom: 0.25rem;
 }
 
 .message.user {
@@ -173,15 +173,16 @@ body {
     margin-bottom: 0.75rem;
     overflow-x: auto;
     padding-bottom: 0.25rem;
+    align-items: center;
 }
 
 .suggested-prompts button {
     background: #fff;
     border: 2px solid #ffca28;
     color: #ffca28;
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.8rem;
     border-radius: 20px;
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     white-space: nowrap;
     cursor: pointer;
     transition: all 0.2s;
@@ -190,6 +191,23 @@ body {
 .suggested-prompts button:hover {
     background: #ffca28;
     color: #1a2d3b;
+}
+
+.suggested-prompts .download-btn {
+    background: #1a2d3b;
+    color: #fff;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.suggested-prompts .download-btn:hover {
+    background: #2c4353;
 }
 
 .chat-form {
@@ -245,25 +263,6 @@ body {
     cursor: not-allowed;
 }
 
-.download-btn {
-    background: #1a2d3b;
-    color: #fff;
-    border: none;
-    padding: 0.5rem;
-    border-radius: 8px;
-    font-family: 'Oswald', sans-serif;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    width: 100%;
-    margin-top: 0.75rem;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.download-btn:hover {
-    background: #2c4353;
-}
-
 /* Desktop Adjustments */
 @media (min-width: 768px) {
     .nav-header {
@@ -279,7 +278,7 @@ body {
     }
 
     .chat-wrapper {
-        max-height: 90vh; /* Increased to allow room for input area */
+        max-height: 90vh;
     }
 
     .chat-title h1 {
@@ -291,11 +290,21 @@ body {
     }
 
     .chat-messages {
-        min-height: 500px; /* Starts tall on desktop */
+        min-height: 500px;
     }
 
     .suggested-prompts {
         justify-content: center;
+    }
+
+    .suggested-prompts button {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .suggested-prompts .download-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
     }
 
     .chat-input-area {
@@ -319,12 +328,6 @@ body {
     .ask-btn {
         width: auto;
         padding: 0.75rem 2rem;
-    }
-
-    .download-btn {
-        width: auto;
-        padding: 0.75rem 1.5rem;
-        margin: 0;
     }
 }
 
