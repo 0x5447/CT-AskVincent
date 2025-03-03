@@ -61,7 +61,7 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 0; /* No padding on mobile to align with viewport */
+    padding: 0; /* No padding on mobile */
 }
 
 .chat-wrapper {
@@ -69,7 +69,7 @@ body {
     flex-direction: column;
     height: calc(100vh - 2.5rem);
     width: 100vw; /* Full viewport width on mobile */
-    margin: 0; /* No margins */
+    margin: 0;
     background: rgba(255, 255, 255, 0.9);
     border-radius: 0; /* No corners on mobile */
     overflow: hidden;
@@ -81,6 +81,15 @@ body {
     color: #fff;
     padding: 1rem;
     text-align: center;
+    transition: opacity 0.3s ease; /* Smooth fade-out */
+}
+
+.chat-title.hidden {
+    opacity: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    overflow: hidden; /* Collapses fully */
 }
 
 .chat-title h1 {
@@ -351,17 +360,17 @@ body {
     }
 
     .chat-main {
-        padding: 0 2rem; /* Restore padding on desktop */
+        padding: 0 2rem;
     }
 
     .chat-wrapper {
         max-height: 90vh;
         height: auto;
-        width: 100%; /* Reset to 100% for desktop */
-        max-width: 800px; /* Constrain width */
-        margin: 0 auto; /* Center it */
-        border-radius: 12px; /* Restore corners */
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Restore shadow */
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
     .chat-messages {
