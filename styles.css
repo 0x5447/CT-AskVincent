@@ -278,6 +278,10 @@ body {
         font-size: 1rem;
     }
 
+    .chat-messages {
+        min-height: 500px; /* Starts tall on desktop */
+    }
+
     .suggested-prompts {
         justify-content: center;
     }
