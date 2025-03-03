@@ -208,6 +208,7 @@ body {
 
 .suggested-prompts .download-btn:hover {
     background: #2c4353;
+     color: #fff;
 }
 
 .chat-form {
