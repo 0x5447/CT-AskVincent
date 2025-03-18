@@ -222,17 +222,35 @@ function addMessage(sender, text, isHTML = false) {
 
     if (sender === 'bot') {
         const icon = document.createElement('img');
-        icon.src = 'https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/icon.png'; // Fixed URL
+        icon.src = 'https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/icon.png'; 
         icon.alt = 'Vincent Icon';
         icon.className = 'bot-icon';
         div.appendChild(icon);
 
         const content = document.createElement('div');
         content.className = 'message-content';
-        isHTML ? content.innerHTML = text : content.textContent = text;
+        if (isHTML) {
+            content.innerHTML = ''; 
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'text/html');
+            while (doc.body.firstChild) {
+                content.appendChild(doc.body.firstChild);
+            }
+        } else {
+            content.textContent = text;
+        }
         div.appendChild(content);
     } else {
-        isHTML ? div.innerHTML = text : div.textContent = text;
+        if (isHTML) {
+            div.innerHTML = ''; 
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'text/html');
+            while (doc.body.firstChild) {
+                div.appendChild(doc.body.firstChild);
+            }
+        } else {
+            div.textContent = text;
+        }
     }
 
     chatbox.appendChild(div);
@@ -242,7 +260,12 @@ function addMessage(sender, text, isHTML = false) {
 
 function updateMessage(element, text) {
     const content = element.querySelector('.message-content');
-    content.innerHTML = text;
+    content.innerHTML = ''; 
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/html');
+    while (doc.body.firstChild) {
+        content.appendChild(doc.body.firstChild);
+    }
     chatbox.scrollTop = chatbox.scrollHeight;
 }
 
@@ -334,10 +357,10 @@ function formatText(text) {
     }
 
     function inlineFormat(text) {
-        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/__(.*?)__/g, '<strong>$1</strong>');
-        text = text.replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/_(.*?)_/g, '<em>$1</em>');
-        text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
-        text = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>\$1</strong>').replace(/__(.*?)__/g, '<strong>\$1</strong>');
+        text = text.replace(/\*(.*?)\*/g, '<em>\$1</em>').replace(/_(.*?)_/g, '<em>\$1</em>');
+        text = text.replace(/`([^`]+)`/g, '<code>\$1</code>');
+        text = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="\$1" target="_blank">\$1</a>');
         return text;
     }
 }
