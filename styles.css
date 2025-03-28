@@ -22,11 +22,9 @@ body {
     flex-direction: column;
 }
 
-/* Header Styling */
 .chat-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -44,6 +42,13 @@ body {
     color: #fff;
     font-family: 'Oswald', sans-serif;
     font-size: 1.8rem;
+    margin: 0;
+    transition: opacity 0.3s;
+}
+
+.chat-title.hidden {
+    opacity: 0;
+    height: 0;
     margin: 0;
 }
 
@@ -63,24 +68,23 @@ body {
     max-width: 80%;
 }
 
-.message-content {
-    word-break: break-word;
-    font-size: 1rem;
-    line-height: 1.6;
-}
-
-.bot {
-    align-items: flex-start;
+.message.bot {
     background: rgba(255, 255, 255, 0.1);
     color: #fff;
     margin-left: 2rem;
 }
 
 .message.user {
-    align-items: flex-end;
     background: #FF6600;
     color: #000;
     margin-right: 2rem;
+    justify-content: flex-end;
+}
+
+.message-content {
+    word-break: break-word;
+    font-size: 1rem;
+    line-height: 1.6;
 }
 
 /* Input Section */
@@ -103,7 +107,9 @@ body {
     font-size: 1rem;
     outline: none;
     resize: none;
-    width: 100%;
+    min-height: 20px;
+    max-height: 100px;
+    overflow-y: auto;
 }
 
 .send-button {
@@ -115,11 +121,16 @@ body {
     cursor: pointer;
     font-family: 'Oswald', sans-serif;
     margin-left: 1rem;
-    transition: all 0.3s;
+    transition: background 0.3s;
 }
 
 .send-button:hover {
     background: #e65c00;
+}
+
+.send-button:disabled {
+    background: #666;
+    cursor: not-allowed;
 }
 
 /* Scrollbar Styling */
@@ -140,6 +151,7 @@ body {
 @media (max-width: 768px) {
     .chat-container {
         padding: 1rem;
+        height: 95vh;
     }
 
     .chat-input {
@@ -148,6 +160,7 @@ body {
 
     #user-input {
         margin-bottom: 0.5rem;
+        width: 100%;
     }
 
     .send-button {
