@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vincent - Connecticut Guide</title>
+    <title>Mainstreet AI Guide</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -25,7 +25,7 @@
             border-radius: 20px;
             width: 100%;
             max-width: 800px;
-            height: 85vh;
+            height: 90vh; /* Taller on desktop */
             max-height: 900px;
             display: flex;
             flex-direction: column;
@@ -38,6 +38,7 @@
             background: linear-gradient(90deg, #ff6f00, #ff8f00);
             color: #fff;
             display: flex;
+            justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
@@ -45,14 +46,27 @@
             font-family: 'Oswald', sans-serif;
             font-size: 1.8rem;
             font-weight: 700;
-            margin-left: 15px;
             text-transform: uppercase;
             letter-spacing: 1px;
+        }
+        .return-button {
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        .return-button:hover {
+            background: rgba(255, 255, 255, 0.4);
         }
         #chatbox {
             flex: 1;
             overflow-y: auto;
-            padding: 20px 10px; /* Reduced side padding */
+            padding: 20px 10px;
             background: rgba(20, 20, 20, 0.9);
             color: #fff;
         }
@@ -70,7 +84,6 @@
             margin: 12px 0;
             padding: 12px 18px;
             border-radius: 12px;
-            /* Removed max-width for full span */
             width: 100%;
             animation: fadeIn 0.3s ease-in;
             font-size: 1rem;
@@ -100,12 +113,12 @@
         #user-input {
             flex: 1;
             padding: 12px 15px;
-            background: rgba(255, 255, 255, 0.25); /* Lighter background */
+            background: rgba(255, 255, 255, 0.25);
             color: #fff;
             border: none;
             border-radius: 10px;
             font-family: 'Inter', sans-serif;
-            font-size: 1.2rem; /* Larger text */
+            font-size: 1.2rem;
             outline: none;
             resize: none;
             min-height: 48px;
@@ -123,7 +136,7 @@
             border: none;
             border-radius: 10px;
             font-family: 'Oswald', sans-serif;
-            font-size: 1.5rem; /* Substantially larger */
+            font-size: 1.5rem;
             font-weight: 500;
             text-transform: uppercase;
             cursor: pointer;
@@ -161,13 +174,14 @@
             to { opacity: 1; transform: translateY(0); }
         }
         @media (max-width: 600px) {
-            body { padding: 10px; }
+            body { padding: 0; } /* Full-screen */
             .chat-container {
-                height: 90vh;
-                border-radius: 15px;
+                height: 100vh; /* 100% height on mobile */
+                border-radius: 0; /* Edge-to-edge */
             }
             .chat-header h1 { font-size: 1.5rem; }
-            #chatbox { padding: 15px 5px; } /* Reduced side padding */
+            .return-button { font-size: 0.85rem; padding: 6px 12px; }
+            #chatbox { padding: 15px 5px; }
             .message { 
                 font-size: 0.95rem; 
                 padding: 10px 14px; 
@@ -199,10 +213,11 @@
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            <h1>Vincent</h1>
+            <h1>Mainstreet AI Guide</h1>
+            <a href="https://mainstreetorigin.com" class="return-button">Return to Home Page</a>
         </div>
         <div id="chatbox">
-            <div class="message">Hi! I’m Vincent, your Connecticut guide. Ask me something!</div>
+            <div class="message">Hi! I’m your Mainstreet AI Guide. Ask me something!</div>
         </div>
         <div class="chat-input">
             <textarea id="user-input" placeholder="Type or speak your question..."></textarea>
@@ -236,7 +251,7 @@
             input.value = '';
             button.disabled = true;
 
-            const loadingMessage = addMessage('', 'Vincent: Thinking...');
+            const loadingMessage = addMessage('', 'Mainstreet AI Guide: Thinking...');
             const contentElement = loadingMessage;
 
             try {
@@ -268,7 +283,7 @@
                             if (data.choices?.[0]?.delta?.content) {
                                 content += data.choices[0].delta.content;
                                 console.log('Chunk:', content);
-                                contentElement.innerHTML = 'Vincent: ' + content;
+                                contentElement.innerHTML = 'Mainstreet AI Guide: ' + content;
                             }
                         }
                     }
@@ -276,7 +291,7 @@
                 if (!content) throw new Error('No response received');
             } catch (error) {
                 console.error('Error:', error);
-                contentElement.innerHTML = 'Vincent: Error - ' + error.message;
+                contentElement.innerHTML = 'Mainstreet AI Guide: Error - ' + error.message;
             } finally {
                 button.disabled = false;
                 input.focus();
@@ -295,8 +310,14 @@
 
             speechButton.addEventListener('click', () => {
                 console.log('Speech button clicked');
-                speechButton.classList.add('active');
-                recognition.start();
+                try {
+                    speechButton.classList.add('active');
+                    recognition.start();
+                } catch (e) {
+                    console.error('Speech start error:', e);
+                    speechButton.classList.remove('active');
+                    addMessage('', 'Mainstreet AI Guide: Speech not supported - please type your question.');
+                }
             });
 
             recognition.onresult = (event) => {
@@ -309,7 +330,7 @@
             recognition.onerror = (event) => {
                 console.error('Speech error:', event.error);
                 speechButton.classList.remove('active');
-                addMessage('', 'Vincent: Speech error - try again!');
+                addMessage('', 'Mainstreet AI Guide: Speech error - ' + (event.error === 'not-allowed' ? 'mic access denied, check permissions' : 'try again'));
             };
 
             recognition.onend = () => {
@@ -318,6 +339,7 @@
         } else {
             speechButton.style.display = 'none';
             console.log('Speech recognition not supported');
+            addMessage('', 'Mainstreet AI Guide: Speech input not available on this device - please type your question.');
         }
 
         console.log('Attaching listeners');
