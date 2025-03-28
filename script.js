@@ -1,19 +1,14 @@
 // Configuration
 const WORKER_URL = 'https://ctguide.optimistprojects.workers.dev';
 const SUGGESTED_PROMPTS = [
-    "What’s the best pizza in Hartford?",
-    "Top parks near Bristol?",
-    "Fun things to do in New Haven?",
-    "Where’s the best seafood in Mystic?",
-    "What are the hidden gems in Connecticut?",
-    "Best hiking trails near Stamford?",
-    "What’s happening in Hartford this weekend?",
-    "Cool museums in Connecticut?"
+    "What services do you offer?",
+    "How much to design my website?",
+    "How can I contact you?",
 ];
 
 // Chat-specific logic
 const form = document.getElementById('chat-form');
-const input = document.getElementById('input');
+const input = document.getElementById('user-input');
 const chatbox = document.getElementById('chatbox');
 const turnstileWidget = document.querySelector('.cf-turnstile');
 const chatTitle = document.getElementById('chat-title');
@@ -40,14 +35,14 @@ if (form && input && chatbox) {
         addMessage('user', userMessage);
         chatHistory.push({ sender: 'You', message: userMessage, timestamp });
         input.value = '';
-        form.querySelector('.ask-btn').disabled = true;
+        form.querySelector('.send-button').disabled = true;
 
         if (isFirstMessage && chatTitle) {
             chatTitle.classList.add('hidden');
             isFirstMessage = false;
         }
 
-        const loadingMessage = addMessage('bot', '<span class="loading-dots"></span>', true);
+        const loadingMessage = addMessage('bot', '<span class="loading-dots">...</span>', true);
 
         try {
             let token = null;
@@ -136,7 +131,7 @@ if (form && input && chatbox) {
             updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
             console.error('Submission error:', error);
         } finally {
-            form.querySelector('.ask-btn').disabled = false;
+            form.querySelector('.send-button').disabled = false;
             input.focus();
         }
     });
@@ -148,56 +143,6 @@ if (form && input && chatbox) {
         }
     });
 }
-
-// Single Rotating Suggested Prompt
-function rotateSuggestedPrompt() {
-    const container = document.getElementById('suggested-prompts');
-    if (!container) return;
-
-    const promptButton = container.querySelector('button:not(.download-btn)');
-    if (!promptButton) return;
-
-    const currentIndex = SUGGESTED_PROMPTS.indexOf(promptButton.textContent);
-    const nextIndex = (currentIndex + 1) % SUGGESTED_PROMPTS.length;
-    
-    promptButton.style.animation = 'fadePrompt 3s ease-in-out';
-    setTimeout(() => {
-        promptButton.textContent = SUGGESTED_PROMPTS[nextIndex];
-        promptButton.onclick = () => usePrompt(SUGGESTED_PROMPTS[nextIndex]);
-        promptButton.style.animation = 'none';
-    }, 300);
-}
-
-function initializeSuggestedPrompt() {
-    const container = document.getElementById('suggested-prompts');
-    if (!container) {
-        console.error('Suggested prompts container not found!');
-        return;
-    }
-
-    container.innerHTML = '';
-    const promptButton = document.createElement('button');
-    promptButton.textContent = SUGGESTED_PROMPTS[0];
-    promptButton.onclick = () => usePrompt(SUGGESTED_PROMPTS[0]);
-    container.appendChild(promptButton);
-
-    const saveButton = document.createElement('button');
-    saveButton.className = 'download-btn';
-    saveButton.textContent = 'Save Chat';
-    saveButton.onclick = downloadChat;
-    container.appendChild(saveButton);
-
-    setInterval(rotateSuggestedPrompt, 4000);
-}
-
-// Ensure initialization runs
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('suggested-prompts')) {
-        initializeSuggestedPrompt();
-    } else {
-        console.error('No #suggested-prompts element found on page load!');
-    }
-});
 
 // Helper Functions
 function addMessage(sender, text, isHTML = false) {
@@ -323,38 +268,4 @@ function formatText(text) {
         text = text.replace(/\*\*(.*?)\*\*/g, '<strong>\$1</strong>').replace(/__(.*?)__/g, '<strong>\$1</strong>');
         text = text.replace(/\*(.*?)\*/g, '<em>\$1</em>').replace(/_(.*?)_/g, '<em>\$1</em>');
         text = text.replace(/`([^`]+)`/g, '<code>\$1</code>');
-        text = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="\$1" target="_blank">\$1</a>');
-        return text;
-    }
-}
-
-function downloadChat() {
-    if (!chatHistory.length) {
-        alert('No chat history to download yet!');
-        return;
-    }
-    const date = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
-    const filename = `CT Guide - Saved Chat ${date}.txt`;
-    
-    let formattedChat = '=== Connecticut AI Guide Chat ===\n';
-    formattedChat += `Saved on: ${date}\n\n`;
-    chatHistory.forEach(entry => {
-        formattedChat += `[${entry.timestamp}] ${entry.sender}:\n`;
-        formattedChat += `${entry.message}\n`;
-        formattedChat += '------------------------\n\n';
-    });
-    formattedChat += '=== End of Chat ===\n';
-
-    const blob = new Blob([formattedChat], { type: 'text/plain' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    link.click();
-}
-
-function usePrompt(text) {
-    if (input) {
-        input.value = text;
-        form.dispatchEvent(new Event('submit'));
-    }
-}
+        text = text.replace(/(https?:\/\/[^\s]+)/g, '</ol>
