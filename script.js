@@ -2,15 +2,16 @@ const WORKER_URL = 'https://msochat.optimistprojects.workers.dev';
 
 function addMessage(sender, text) {
     console.log(`Adding ${sender} message:`, text);
+    const chatbox = document.getElementById('chatbox');
     const div = document.createElement('div');
     div.className = `message ${sender}`;
     const content = document.createElement('div');
     content.className = 'message-content';
     content.innerHTML = text;
     div.appendChild(content);
-    document.getElementById('chatbox').appendChild(div);
+    chatbox.appendChild(div);
     console.log('Message appended to chatbox');
-    document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
+    chatbox.scrollTop = chatbox.scrollHeight;
     return div;
 }
 
@@ -91,17 +92,16 @@ async function sendMessage(userMessage) {
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded');
-    const form = document.getElementById('chat-form');
+    const sendButton = document.querySelector('.send-button');
     const input = document.getElementById('user-input');
     const chatbox = document.getElementById('chatbox');
 
-    if (form && input && chatbox) {
+    if (sendButton && input && chatbox) {
         console.log('Chat elements found, initializing');
-        window.chatHistory = []; // Global to persist across reloads if needed
+        window.chatHistory = [];
 
-        form.addEventListener('submit', (e) => {
-            console.log('Form submit triggered');
-            e.preventDefault();
+        sendButton.addEventListener('click', () => {
+            console.log('Send button clicked');
             const message = input.value.trim();
             if (message) {
                 console.log('Calling sendMessage with:', message);
@@ -117,7 +117,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 console.log('Enter pressed');
                 e.preventDefault();
-                form.dispatchEvent(new Event('submit'));
+                const message = input.value.trim();
+                if (message) {
+                    console.log('Calling sendMessage with:', message);
+                    sendMessage(message);
+                    console.log('Clearing input');
+                    input.value = '';
+                }
             }
         });
 
@@ -126,6 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
             input.style.height = `${input.scrollHeight}px`;
         });
     } else {
-        console.error('Missing chat elements:', { form: !!form, input: !!input, chatbox: !!chatbox });
+        console.error('Missing chat elements:', { sendButton: !!sendButton, input: !!input, chatbox: !!chatbox });
     }
 });
