@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vincent</title>
+    <title>Mainstreet AI Guide</title>
+    <!-- Uncomment Turnstile if needed -->
+    <!-- <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script> -->
     <style>
         body {
             margin: 0;
@@ -11,9 +13,19 @@
             background: #000;
             color: #fff;
             font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+        }
+        .chat-container {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 15px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
         #chatbox {
-            height: 300px;
+            height: 400px;
             overflow-y: auto;
             background: #222;
             padding: 10px;
@@ -21,50 +33,80 @@
             border-radius: 5px;
         }
         .message {
-            margin: 5px 0;
-            padding: 5px;
+            margin: 8px 0;
+            padding: 8px;
             background: #333;
             border-radius: 5px;
+            word-wrap: break-word;
+        }
+        .message.user {
+            background: #f60;
+            color: #000;
+            text-align: right;
         }
         #user-input {
             width: 70%;
-            padding: 5px;
+            padding: 8px;
             background: #444;
             color: #fff;
             border: none;
             border-radius: 5px;
+            resize: none;
         }
         #send-button {
-            padding: 5px 10px;
+            padding: 8px 15px;
             background: #f60;
             color: #000;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin-left: 10px;
         }
         #send-button:disabled {
             background: #666;
             cursor: not-allowed;
         }
+        #chatbox::-webkit-scrollbar {
+            width: 5px;
+        }
+        #chatbox::-webkit-scrollbar-thumb {
+            background: #f60;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
-    <div id="chatbox">
-        <div class="message">Hi! I’m Vincent. Ask me something!</div>
+    <div class="chat-container">
+        <div id="chatbox">
+            <div class="message">Hi! I’m Vincent, your Connecticut guide. Ask me something!</div>
+        </div>
+        <input id="user-input" placeholder="Type here...">
+        <!-- Uncomment for Turnstile -->
+        <!-- <div class="cf-turnstile" data-sitekey="0x4AAAAAAA_CsY1Tr0uuxaor" data-callback="onTurnstileSuccess"></div> -->
+        <button id="send-button">Send</button>
     </div>
-    <input id="user-input" placeholder="Type here...">
-    <button id="send-button">Send</button>
 
     <script>
         const WORKER_URL = 'https://msochat.optimistprojects.workers.dev';
         console.log('Script loaded');
 
+        // Uncomment for Turnstile
+        /*
+        let turnstileToken = null;
+        window.onTurnstileSuccess = (token) => {
+            console.log('Turnstile success:', token);
+            turnstileToken = token;
+            document.querySelector('.cf-turnstile').style.display = 'none';
+        };
+        let isVerified = false;
+        */
+
         function addMessage(sender, text) {
             console.log('Adding message:', sender, text);
             const chatbox = document.getElementById('chatbox');
             const div = document.createElement('div');
-            div.className = 'message';
-            div.innerHTML = `${sender}: ${text}`;
+            div.className = `message ${sender}`;
+            div.innerHTML = text;
             chatbox.appendChild(div);
             chatbox.scrollTop = chatbox.scrollHeight;
             return div;
@@ -76,17 +118,24 @@
             const message = input.value.trim() || 'Hello';
             console.log('Sending:', message);
 
-            addMessage('You', message);
+            addMessage('user', message);
             input.value = '';
             button.disabled = true;
 
-            const loadingMessage = addMessage('Vincent', 'Thinking...');
-            const contentElement = loadingMessage.querySelector('.message-content') || loadingMessage;
+            const loadingMessage = addMessage('', 'Vincent: Thinking...');
+            const contentElement = loadingMessage;
 
             try {
-                const url = `${WORKER_URL}?query=${encodeURIComponent(message)}`;
-                console.log('Fetching:', url);
+                let url = `${WORKER_URL}?query=${encodeURIComponent(message)}`;
+                // Uncomment for Turnstile
+                /*
+                if (!isVerified && turnstileToken) {
+                    url += `&cfToken=${encodeURIComponent(turnstileToken)}`;
+                    console.log('Using token:', turnstileToken);
+                }
+                */
 
+                console.log('Fetching:', url);
                 const response = await fetch(url);
                 console.log('Response status:', response.status);
                 if (!response.ok) throw new Error('Fetch failed: ' + response.status);
@@ -118,9 +167,11 @@
                     }
                 }
                 if (!content) throw new Error('No response received');
+                // Uncomment for Turnstile
+                // if (!isVerified && turnstileToken) isVerified = true;
             } catch (error) {
                 console.error('Error:', error);
-                contentElement.innerHTML = 'Error: ' + error.message;
+                contentElement.innerHTML = 'Vincent: Error - ' + error.message;
             } finally {
                 button.disabled = false;
                 input.focus();
