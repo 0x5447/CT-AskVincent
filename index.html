@@ -52,7 +52,7 @@
         #chatbox {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            padding: 20px 10px; /* Reduced side padding */
             background: rgba(20, 20, 20, 0.9);
             color: #fff;
         }
@@ -70,7 +70,8 @@
             margin: 12px 0;
             padding: 12px 18px;
             border-radius: 12px;
-            max-width: 92%; /* Wider messages */
+            /* Removed max-width for full span */
+            width: 100%;
             animation: fadeIn 0.3s ease-in;
             font-size: 1rem;
             line-height: 1.5;
@@ -78,16 +79,14 @@
         .message.user {
             background: linear-gradient(135deg, #ff6f00, #ff8f00);
             color: #000;
-            align-self: flex-end;
-            margin-left: auto;
         }
         .message:not(.user) {
             background: rgba(50, 50, 50, 0.9);
             color: #fff;
-            border-left: 4px solid #ff8f00; /* Vincent’s standout border */
-            box-shadow: 0 2px 8px rgba(255, 143, 0, 0.3); /* Subtle glow */
-            font-size: 1.1rem; /* Slightly larger text */
-            font-weight: 500; /* Bolder for emphasis */
+            border-left: 4px solid #ff8f00;
+            box-shadow: 0 2px 8px rgba(255, 143, 0, 0.3);
+            font-size: 1.1rem;
+            font-weight: 500;
         }
         .chat-input {
             padding: 15px 20px;
@@ -100,31 +99,31 @@
         }
         #user-input {
             flex: 1;
-            padding: 10px 15px;
-            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.25); /* Lighter background */
             color: #fff;
             border: none;
             border-radius: 10px;
             font-family: 'Inter', sans-serif;
-            font-size: 1rem;
+            font-size: 1.2rem; /* Larger text */
             outline: none;
             resize: none;
-            min-height: 40px;
-            max-height: 100px;
+            min-height: 48px;
+            max-height: 120px;
             overflow-y: auto;
             transition: background 0.3s;
         }
         #user-input:focus {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.35);
         }
         #send-button {
-            padding: 10px 20px;
+            padding: 12px 24px;
             background: linear-gradient(90deg, #ff6f00, #ff8f00);
             color: #fff;
             border: none;
             border-radius: 10px;
             font-family: 'Oswald', sans-serif;
-            font-size: 1rem;
+            font-size: 1.5rem; /* Substantially larger */
             font-weight: 500;
             text-transform: uppercase;
             cursor: pointer;
@@ -140,6 +139,23 @@
             transform: none;
             box-shadow: none;
         }
+        #speech-button {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        #speech-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        #speech-button.active {
+            background: #ff8f00;
+            color: #000;
+        }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -151,13 +167,12 @@
                 border-radius: 15px;
             }
             .chat-header h1 { font-size: 1.5rem; }
-            #chatbox { padding: 15px; }
+            #chatbox { padding: 15px 5px; } /* Reduced side padding */
             .message { 
                 font-size: 0.95rem; 
                 padding: 10px 14px; 
-                max-width: 95%; /* Even wider on mobile */
             }
-            .message:not(.user) { font-size: 1.05rem; } /* Adjust Vincent’s text */
+            .message:not(.user) { font-size: 1.05rem; }
             .chat-input {
                 padding: 10px;
                 flex-direction: column;
@@ -165,11 +180,18 @@
             #user-input {
                 width: 100%;
                 margin-bottom: 10px;
-                padding: 8px 12px;
+                padding: 10px 12px;
+                font-size: 1.1rem;
             }
             #send-button {
                 width: 100%;
+                padding: 14px;
+                font-size: 1.4rem;
+            }
+            #speech-button {
+                width: 100%;
                 padding: 12px;
+                font-size: 1.1rem;
             }
         }
     </style>
@@ -183,8 +205,9 @@
             <div class="message">Hi! I’m Vincent, your Connecticut guide. Ask me something!</div>
         </div>
         <div class="chat-input">
-            <textarea id="user-input" placeholder="Type here..."></textarea>
-            <button id="send-button">Send</button>
+            <textarea id="user-input" placeholder="Type or speak your question..."></textarea>
+            <button id="speech-button">🎙️</button>
+            <button id="send-button">Ask</button>
         </div>
     </div>
 
@@ -260,6 +283,43 @@
             }
         }
 
+        // Speech Recognition
+        const speechButton = document.getElementById('speech-button');
+        const input = document.getElementById('user-input');
+        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            speechButton.addEventListener('click', () => {
+                console.log('Speech button clicked');
+                speechButton.classList.add('active');
+                recognition.start();
+            });
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                console.log('Speech recognized:', transcript);
+                input.value = transcript;
+                speechButton.classList.remove('active');
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech error:', event.error);
+                speechButton.classList.remove('active');
+                addMessage('', 'Vincent: Speech error - try again!');
+            };
+
+            recognition.onend = () => {
+                speechButton.classList.remove('active');
+            };
+        } else {
+            speechButton.style.display = 'none';
+            console.log('Speech recognition not supported');
+        }
+
         console.log('Attaching listeners');
         const button = document.getElementById('send-button');
         button.addEventListener('click', () => {
@@ -267,7 +327,6 @@
             sendMessage();
         });
 
-        const input = document.getElementById('user-input');
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 console.log('Enter pressed');
