@@ -3,14 +3,14 @@ const WORKER_URL = 'https://msochat.optimistprojects.workers.dev';
 
 // Chat-specific logic
 const form = document.getElementById('chat-form');
-const input = document.getElementById('user-input'); // Updated to match your current HTML
+const input = document.getElementById('user-input');
 const chatbox = document.getElementById('chatbox');
+const chatTitle = document.querySelector('.chat-title');
 const turnstileWidget = document.querySelector('.cf-turnstile');
-const chatTitle = document.querySelector('.chat-title'); // Updated to match current class
 let chatHistory = [];
 let lastMessageTime = 0;
 const RATE_LIMIT_MS = 3000;
-let isVerified = false;
+let isVerified = true; // Temporarily bypass Turnstile for testing
 let isFirstMessage = true;
 
 if (form && input && chatbox) {
@@ -30,7 +30,7 @@ if (form && input && chatbox) {
         addMessage('user', userMessage);
         chatHistory.push({ sender: 'You', message: userMessage, timestamp: new Date().toLocaleString() });
         input.value = '';
-        form.querySelector('.send-button').disabled = true; // Updated to match current HTML
+        form.querySelector('.send-button').disabled = true;
 
         if (isFirstMessage && chatTitle) {
             chatTitle.classList.add('hidden');
@@ -40,26 +40,26 @@ if (form && input && chatbox) {
         const loadingMessage = addMessage('bot', '<span class="loading-dots">...</span>', true);
 
         try {
+            // Temporarily disable Turnstile for testing
+            /*
             let token = null;
             if (!isVerified) {
-                // Try getting token from widget or Turnstile API
                 token = turnstileWidget.getAttribute('data-response') || 
                         (typeof turnstile !== 'undefined' ? await turnstile.getResponse('.cf-turnstile') : null);
-
                 if (!token) {
                     throw new Error('Please verify you are human first');
                 }
                 console.log('Turnstile token:', token);
             }
+            */
 
-            const url = isVerified 
-                ? `${WORKER_URL}?query=${encodeURIComponent(userMessage)}`
-                : `${WORKER_URL}?query=${encodeURIComponent(userMessage)}&cfToken=${encodeURIComponent(token)}`;
+            const url = `${WORKER_URL}?query=${encodeURIComponent(userMessage)}`; // No cfToken for now
             console.log('Fetching from:', url);
 
             const response = await fetch(url, {
                 headers: { 'Content-Type': 'application/json' },
             }).catch(err => {
+                console.error('Raw fetch error:', err);
                 throw new Error(`Network error: ${err.message}`);
             });
 
@@ -101,7 +101,7 @@ if (form && input && chatbox) {
                             const data = JSON.parse(dataLine.slice(5));
                             if (data.choices?.[0]?.delta?.content) {
                                 content += data.choices[0].delta.content;
-                                updateMessage(loadingMessage, content); // Simplified to raw text for now
+                                updateMessage(loadingMessage, content);
                                 if (content && loadingMessage.querySelector('.loading-dots')) {
                                     loadingMessage.querySelector('.loading-dots').remove();
                                 }
@@ -127,10 +127,12 @@ if (form && input && chatbox) {
                 updateMessage(loadingMessage, content || 'Unexpected response format');
             }
 
+            /*
             if (!isVerified && token) {
                 isVerified = true;
-                turnstileWidget.style.display = 'none'; // Hide after first successful verification
+                turnstileWidget.style.display = 'none';
             }
+            */
         } catch (error) {
             console.error('Submission error:', error);
             updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
@@ -170,6 +172,6 @@ function addMessage(sender, text, isHTML = false) {
 
 function updateMessage(element, text) {
     const content = element.querySelector('.message-content');
-    content.innerHTML = text; // Simplified to raw text for now
+    content.innerHTML = text;
     chatbox.scrollTop = chatbox.scrollHeight;
 }
