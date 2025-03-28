@@ -62,12 +62,15 @@ if (form && input && chatbox) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody),
+            }).catch(err => {
+                // Catch network-level errors (e.g., DNS failure, timeout)
+                throw new Error(`Network error: ${err.message}`);
             });
 
-            console.log('Response status:', response.status);
+            console.log('Response status:', response.status, 'OK:', response.ok);
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Server error: ${response.status} - ${errorText}`);
+                const errorData = await response.json().catch(() => ({ error: 'Unknown server error' }));
+                throw new Error(`Server error: ${response.status} - ${errorData.error || 'No details provided'}`);
             }
 
             const contentType = response.headers.get('content-type');
@@ -105,11 +108,8 @@ if (form && input && chatbox) {
                         }
                     }
                 }
-            } else if (contentType?.includes('application/json')) {
-                const data = await response.json();
-                content = data.reply || 'No reply provided';
-                updateMessage(loadingMessage, content);
             } else {
+                // Fallback for unexpected content types
                 content = await response.text();
                 updateMessage(loadingMessage, content || 'No response received');
             }
@@ -117,10 +117,8 @@ if (form && input && chatbox) {
             if (!content) throw new Error('Empty response from server');
             chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
         } catch (error) {
-            console.error('Fetch error details:', error);
+            console.error('Detailed error:', error);
             updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
-            // Mock response for testing
-            // updateMessage(loadingMessage, "Mock response: Hi, I'm Vincent! (API not working)");
         } finally {
             form.querySelector('.send-button').disabled = false;
             input.focus();
