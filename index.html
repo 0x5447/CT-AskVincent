@@ -2,47 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ask Vincent CT Guide</title>
-    <link rel="stylesheet" href="/styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vincent CT Guide</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="background-overlay"></div>
-    <header class="nav-header">
-        <nav class="main-nav">
-            <a href="/index.html" class="nav-active">Ask Vincent</a>
-            <a href="/about.html">About</a>
-            <a href="/support.html">Support</a>
-            <a href="/contact.html">Contact</a>
-        </nav>
-    </header>
-    <main class="chat-main">
-        <div class="chat-wrapper">
-            <div class="chat-title" id="chat-title">
-                <h1>Welcome</h1>
-                <p>I am Vincent your private AI guide to Connecticut. Ask me anything!</p>
+    <div class="chat-container">
+        <header class="chat-header">
+            <div class="logo"></div>
+            <h1 class="chat-title">Vincent</h1>
+        </header>
+        <div class="message-list" id="chatbox">
+            <div class="message bot">
+                <div class="message-content">Hello, I'm Vincent. How can I assist you in Connecticut?</div>
             </div>
-            <section class="chat-messages" id="chatbox">
-                <div class="message bot">
-                    <img src="https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/icon.png" alt="Vincent Icon" class="bot-icon">
-                    <div class="message-content">Hey, I’m Vincent! What do you want to explore in Connecticut?</div>
-                </div>
-            </section>
-            <section class="chat-input-area">
-                <div class="suggested-prompts" id="suggested-prompts">
-                    <!-- Single prompt populated by JS -->
-                    <button class="download-btn" onclick="downloadChat()">Save Chat</button>
-                </div>
-                <form id="chat-form" class="chat-form">
-                    <textarea id="input" placeholder="Ask Me Anything..." rows="1" autocomplete="off" required></textarea>
-                    <div class="cf-turnstile" data-sitekey="0x4AAAAAAA_CsY1Tr0uuxaor"></div>
-                    <button type="submit" class="ask-btn">Ask Me</button>
-                </form>
-            </section>
         </div>
-    </main>
-    <script src="/script.js"></script>
+        <form class="chat-input">
+            <textarea id="user-input" placeholder="Type your message..." autocomplete="off"></textarea>
+            <button type="submit" class="send-button">Send</button>
+        </form>
+    </div>
 </body>
 </html>
