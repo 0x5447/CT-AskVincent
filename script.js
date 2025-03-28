@@ -1,10 +1,5 @@
 // Configuration
-const WORKER_URL = 'https://ctguide.optimistprojects.workers.dev';
-const SUGGESTED_PROMPTS = [
-    "What services do you offer?",
-    "How much to design my website?",
-    "How can I contact you?",
-];
+const WORKER_URL = 'https://msochat.optimistprojects.workers.dev';
 
 // Chat-specific logic
 const form = document.getElementById('chat-form');
@@ -20,6 +15,7 @@ let turnstileToken = null;
 
 // Turnstile callback
 window.onTurnstileSuccess = (token) => {
+    console.log('Turnstile verified, token:', token);
     turnstileToken = token;
     isVerified = true;
     document.querySelector('.cf-turnstile').style.display = 'none';
@@ -38,9 +34,9 @@ if (form && input && chatbox) {
         }
         lastMessageTime = now;
 
-        const timestamp = new Date().toLocaleString();
+        console.log('User message:', userMessage);
         addMessage('user', userMessage);
-        chatHistory.push({ sender: 'You', message: userMessage, timestamp });
+        chatHistory.push({ sender: 'You', message: userMessage, timestamp: new Date().toLocaleString() });
         input.value = '';
         form.querySelector('.send-button').disabled = true;
 
@@ -56,24 +52,30 @@ if (form && input && chatbox) {
                 throw new Error('Please complete the verification first.');
             }
 
-            const url = isVerified
-                ? `${WORKER_URL}?query=${encodeURIComponent(userMessage)}`
-                : `${WORKER_URL}?query=${encodeURIComponent(userMessage)}&cfToken=${encodeURIComponent(turnstileToken)}`;
+            const url = `${WORKER_URL}?query=${encodeURIComponent(userMessage)}${
+                !isVerified ? `&cfToken=${encodeURIComponent(turnstileToken)}` : ''
+            }`;
+            console.log('Fetching from:', url);
 
             const response = await fetch(url, {
+                method: 'GET', // Assuming GET since it’s a query; adjust if your worker expects POST
                 headers: { 'Content-Type': 'application/json' },
             });
 
+            console.log('Response status:', response.status);
             if (!response.ok) {
-                throw new Error(`Server error: ${response.status}`);
+                const errorText = await response.text();
+                throw new Error(`Server error: ${response.status} - ${errorText}`);
             }
 
             const contentType = response.headers.get('content-type');
+            console.log('Content-Type:', contentType);
+
+            let content = '';
             if (contentType?.includes('text/event-stream')) {
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let buffer = '';
-                let content = '';
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -91,8 +93,8 @@ if (form && input && chatbox) {
                             const data = JSON.parse(dataLine.slice(5));
                             if (data.choices?.[0]?.delta?.content) {
                                 content += data.choices[0].delta.content;
-                                updateMessage(loadingMessage, formatText(content));
-                                if (content && loadingMessage.querySelector('.loading-dots')) {
+                                updateMessage(loadingMessage, content);
+                                if (loadingMessage.querySelector('.loading-dots')) {
                                     loadingMessage.querySelector('.loading-dots').remove();
                                 }
                             }
@@ -101,20 +103,20 @@ if (form && input && chatbox) {
                         }
                     }
                 }
-
-                if (!content) throw new Error('No response received');
-                chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
             } else if (contentType?.includes('application/json')) {
                 const data = await response.json();
-                const content = data.reply || 'No reply provided';
-                updateMessage(loadingMessage, formatText(content));
-                chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
+                content = data.reply || 'No reply provided';
+                updateMessage(loadingMessage, content);
             } else {
-                throw new Error('Unexpected response format');
+                content = await response.text();
+                updateMessage(loadingMessage, content || 'No response received');
             }
+
+            if (!content) throw new Error('Empty response from server');
+            chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
         } catch (error) {
+            console.error('Error details:', error);
             updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
-            console.error('Submission error:', error);
         } finally {
             form.querySelector('.send-button').disabled = false;
             input.focus();
@@ -151,98 +153,6 @@ function addMessage(sender, text, isHTML = false) {
 
 function updateMessage(element, text) {
     const content = element.querySelector('.message-content');
-    content.innerHTML = formatText(text);
+    content.innerHTML = text;
     chatbox.scrollTop = chatbox.scrollHeight;
-}
-
-function formatText(text) {
-    const lines = text.split('\n');
-    let html = '';
-    let inOrderedList = false;
-    let inUnorderedList = false;
-    let inCodeBlock = false;
-    let inBlockquote = false;
-    let listItems = [];
-    let codeBlockContent = [];
-    let blockquoteLines = [];
-
-    for (const line of lines) {
-        const trimmed = line.trim();
-
-        if (trimmed.startsWith('```')) {
-            if (!inCodeBlock) {
-                closePendingElements();
-                inCodeBlock = true;
-            } else {
-                html += `<pre><code>${codeBlockContent.join('\n')}</code></pre>`;
-                codeBlockContent = [];
-                inCodeBlock = false;
-            }
-            continue;
-        }
-        if (inCodeBlock) {
-            codeBlockContent.push(line);
-            continue;
-        }
-
-        if (trimmed.match(/^#{1,3}\s/)) {
-            closePendingElements();
-            const level = trimmed.match(/^#+/)[0].length;
-            const content = trimmed.replace(/^#+\s/, '');
-            html += `<h${level}>${inlineFormat(content)}</h${level}>`;
-            continue;
-        }
-
-        if (trimmed.match(/^\d+\.\s/)) {
-            if (!inOrderedList) closePendingElements();
-            inOrderedList = true;
-            listItems.push(`<li>${inlineFormat(trimmed.replace(/^\d+\.\s/, ''))}</li>`);
-            continue;
-        }
-
-        if (trimmed.match(/^[-*]\s/)) {
-            if (!inUnorderedList) closePendingElements();
-            inUnorderedList = true;
-            listItems.push(`<li>${inlineFormat(trimmed.replace(/^[-*]\s/, ''))}</li>`);
-            continue;
-        }
-
-        if (trimmed.startsWith('>')) {
-            if (!inBlockquote) closePendingElements();
-            inBlockquote = true;
-            blockquoteLines.push(inlineFormat(trimmed.replace(/^>\s*/, '')));
-            continue;
-        }
-
-        if (trimmed) {
-            closePendingElements();
-            html += `<p>${inlineFormat(trimmed)}</p>`;
-        }
-    }
-
-    closePendingElements();
-    return html || text;
-
-    function closePendingElements() {
-        if (listItems.length) {
-            html += inOrderedList ? `<ol>${listItems.join('')}</ol>` : `<ul>${listItems.join('')}</ul>`;
-            listItems = [];
-            inOrderedList = inUnorderedList = false;
-        }
-        if (blockquoteLines.length) {
-            html += `<blockquote>${blockquoteLines.join('<br>')}</blockquote>`;
-            blockquoteLines = [];
-            inBlockquote = false;
-        }
-    }
-
-    function inlineFormat(text) {
-        return text
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/__(.*?)__/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            .replace(/_(.*?)_/g, '<em>$1</em>')
-            .replace(/`([^`]+)`/g, '<code>$1</code>')
-            .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
-    }
 }
