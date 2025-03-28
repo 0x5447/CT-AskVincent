@@ -1,10 +1,5 @@
 // Configuration
 const WORKER_URL = 'https://ctguide.optimistprojects.workers.dev';
-const BACKGROUND_IMAGES = [
-    'https://raw.githubusercontent.com/0xTG/venice-mso/main/VeniceAI_Vf7NGoK.webp',
-    'https://raw.githubusercontent.com/0xTG/venice-mso/main/VeniceAI_jXw0mwJ.webp',
-    'https://raw.githubusercontent.com/0xTG/venice-mso/main/VeniceAI_sFkAxgA.webp'
-];
 const SUGGESTED_PROMPTS = [
     "What’s the best pizza in Hartford?",
     "Top parks near Bristol?",
@@ -15,17 +10,6 @@ const SUGGESTED_PROMPTS = [
     "What’s happening in Hartford this weekend?",
     "Cool museums in Connecticut?"
 ];
-
-BACKGROUND_IMAGES.forEach(url => new Image().src = url);
-
-function rotateBackground() {
-    document.body.style.backgroundImage = `url(${BACKGROUND_IMAGES[bgIndex]})`;
-    bgIndex = (bgIndex + 1) % BACKGROUND_IMAGES.length;
-}
-
-let bgIndex = 0;
-rotateBackground();
-setInterval(rotateBackground, 30000);
 
 // Chat-specific logic
 const form = document.getElementById('chat-form');
@@ -221,33 +205,17 @@ function addMessage(sender, text, isHTML = false) {
     div.className = `message ${sender}`;
 
     if (sender === 'bot') {
-        const icon = document.createElement('img');
-        icon.src = 'https://raw.githubusercontent.com/TGrahamGit/venice-mso/refs/heads/main/icon.png'; 
-        icon.alt = 'Vincent Icon';
-        icon.className = 'bot-icon';
-        div.appendChild(icon);
-
         const content = document.createElement('div');
         content.className = 'message-content';
         if (isHTML) {
-            content.innerHTML = ''; 
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(text, 'text/html');
-            while (doc.body.firstChild) {
-                content.appendChild(doc.body.firstChild);
-            }
+            content.innerHTML = text;
         } else {
             content.textContent = text;
         }
         div.appendChild(content);
     } else {
         if (isHTML) {
-            div.innerHTML = ''; 
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(text, 'text/html');
-            while (doc.body.firstChild) {
-                div.appendChild(doc.body.firstChild);
-            }
+            div.innerHTML = text;
         } else {
             div.textContent = text;
         }
@@ -259,13 +227,8 @@ function addMessage(sender, text, isHTML = false) {
 }
 
 function updateMessage(element, text) {
-    const content = element.querySelector('.message-content');
-    content.innerHTML = ''; 
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(text, 'text/html');
-    while (doc.body.firstChild) {
-        content.appendChild(doc.body.firstChild);
-    }
+    const content = element.querySelector('.message-content') || element;
+    content.innerHTML = formatText(text);
     chatbox.scrollTop = chatbox.scrollHeight;
 }
 
@@ -344,7 +307,7 @@ function formatText(text) {
 
     function closePendingElements() {
         if (listItems.length) {
-            html += (inOrderedList ? '<ol>' : '<ul>') + listItems.join('') + (inOrderedList ? '</ol>' : '</ul>');
+            html += (inOrderedList ? '<ol>' : '<ul>') + listItems.join('') + (inOrderedList ? '' : '</ul>');
             listItems = [];
             inOrderedList = false;
             inUnorderedList = false;
