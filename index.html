@@ -59,25 +59,29 @@
         const WORKER_URL = 'https://msochat.optimistprojects.workers.dev';
         console.log('Script loaded');
 
-        function addMessage(text) {
-            console.log('Adding message:', text);
+        function addMessage(sender, text) {
+            console.log('Adding message:', sender, text);
             const chatbox = document.getElementById('chatbox');
             const div = document.createElement('div');
             div.className = 'message';
-            div.innerHTML = text;
+            div.innerHTML = `${sender}: ${text}`;
             chatbox.appendChild(div);
             chatbox.scrollTop = chatbox.scrollHeight;
+            return div;
         }
 
         async function sendMessage() {
             const input = document.getElementById('user-input');
             const button = document.getElementById('send-button');
-            const message = input.value.trim() || 'Hello'; // Default to 'Hello' if empty
+            const message = input.value.trim() || 'Hello';
             console.log('Sending:', message);
 
-            addMessage('You: ' + message);
+            addMessage('You', message);
             input.value = '';
             button.disabled = true;
+
+            const loadingMessage = addMessage('Vincent', 'Thinking...');
+            const contentElement = loadingMessage.querySelector('.message-content') || loadingMessage;
 
             try {
                 const url = `${WORKER_URL}?query=${encodeURIComponent(message)}`;
@@ -94,7 +98,10 @@
 
                 while (true) {
                     const { done, value } = await reader.read();
-                    if (done) break;
+                    if (done) {
+                        console.log('Stream complete');
+                        break;
+                    }
                     buffer += decoder.decode(value, { stream: true });
                     const events = buffer.split('\n\n');
                     buffer = events.pop();
@@ -105,14 +112,15 @@
                             if (data.choices?.[0]?.delta?.content) {
                                 content += data.choices[0].delta.content;
                                 console.log('Chunk:', content);
-                                addMessage('Vincent: ' + content);
+                                contentElement.innerHTML = 'Vincent: ' + content;
                             }
                         }
                     }
                 }
+                if (!content) throw new Error('No response received');
             } catch (error) {
                 console.error('Error:', error);
-                addMessage('Error: ' + error.message);
+                contentElement.innerHTML = 'Error: ' + error.message;
             } finally {
                 button.disabled = false;
                 input.focus();
