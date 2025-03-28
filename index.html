@@ -3,26 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vincent - Connecticut Guide</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <title>Vincent</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        #chatbox {
+            height: 300px;
+            overflow-y: auto;
+            background: #222;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 5px;
+            background: #333;
+            border-radius: 5px;
+        }
+        #user-input {
+            width: 70%;
+            padding: 5px;
+            background: #444;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+        #send-button {
+            padding: 5px 10px;
+            background: #f60;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #send-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
-    <div class="chat-container">
-        <header class="chat-header">
-            <div class="logo"></div>
-            <h1 class="chat-title">Vincent</h1>
-        </header>
-        <section class="chat-messages" id="chatbox">
-            <div class="message bot">
-                <div class="message-content">Hello! I’m Vincent, your Connecticut guide. Ask me anything!</div>
-            </div>
-        </section>
-        <div class="chat-input">
-            <textarea id="user-input" placeholder="Type your message..." rows="1" autocomplete="off"></textarea>
-            <button class="send-button">Ask</button>
-        </div>
+    <div id="chatbox">
+        <div class="message">Hi! I’m Vincent. Ask me something!</div>
     </div>
-    <script src="script.js"></script>
+    <input id="user-input" placeholder="Type here...">
+    <button id="send-button">Send</button>
+
+    <script>
+        const WORKER_URL = 'https://msochat.optimistprojects.workers.dev';
+        console.log('Script loaded');
+
+        function addMessage(text) {
+            console.log('Adding message:', text);
+            const chatbox = document.getElementById('chatbox');
+            const div = document.createElement('div');
+            div.className = 'message';
+            div.innerHTML = text;
+            chatbox.appendChild(div);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const button = document.getElementById('send-button');
+            const message = input.value.trim() || 'Hello'; // Default to 'Hello' if empty
+            console.log('Sending:', message);
+
+            addMessage('You: ' + message);
+            input.value = '';
+            button.disabled = true;
+
+            try {
+                const url = `${WORKER_URL}?query=${encodeURIComponent(message)}`;
+                console.log('Fetching:', url);
+
+                const response = await fetch(url);
+                console.log('Response status:', response.status);
+                if (!response.ok) throw new Error('Fetch failed: ' + response.status);
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let content = '';
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const events = buffer.split('\n\n');
+                    buffer = events.pop();
+                    for (const event of events) {
+                        const dataLine = event.split('\n').find(line => line.startsWith('data:'));
+                        if (dataLine) {
+                            const data = JSON.parse(dataLine.slice(5));
+                            if (data.choices?.[0]?.delta?.content) {
+                                content += data.choices[0].delta.content;
+                                console.log('Chunk:', content);
+                                addMessage('Vincent: ' + content);
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('Error: ' + error.message);
+            } finally {
+                button.disabled = false;
+                input.focus();
+            }
+        }
+
+        console.log('Attaching listeners');
+        const button = document.getElementById('send-button');
+        button.addEventListener('click', () => {
+            console.log('Button clicked');
+            sendMessage();
+        });
+
+        const input = document.getElementById('user-input');
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                console.log('Enter pressed');
+                sendMessage();
+            }
+        });
+    </script>
 </body>
 </html>
