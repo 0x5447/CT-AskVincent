@@ -123,6 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     sendMessage(message);
                     console.log('Clearing input');
                     input.value = '';
+                } else {
+                    console.log('Empty message, skipping');
                 }
             }
         });
@@ -131,7 +133,18 @@ document.addEventListener('DOMContentLoaded', () => {
             input.style.height = 'auto';
             input.style.height = `${input.scrollHeight}px`;
         });
+
+        // Test button functionality
+        console.log('Adding test button listener');
+        sendButton.addEventListener('click', () => console.log('Test click registered'));
     } else {
         console.error('Missing chat elements:', { sendButton: !!sendButton, input: !!input, chatbox: !!chatbox });
     }
+
+    // Test fetch on load
+    console.log('Running test fetch');
+    fetch(`${WORKER_URL}?query=test`)
+        .then(res => res.text())
+        .then(text => console.log('Test fetch result:', text.slice(0, 100) + '...'))
+        .catch(err => console.error('Test fetch failed:', err));
 });
