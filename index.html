@@ -67,10 +67,10 @@
             border-radius: 4px;
         }
         .message {
-            margin: 10px 0;
+            margin: 12px 0;
             padding: 12px 18px;
             border-radius: 12px;
-            max-width: 80%;
+            max-width: 92%; /* Wider messages */
             animation: fadeIn 0.3s ease-in;
             font-size: 1rem;
             line-height: 1.5;
@@ -82,8 +82,12 @@
             margin-left: auto;
         }
         .message:not(.user) {
-            background: rgba(50, 50, 50, 0.8);
+            background: rgba(50, 50, 50, 0.9);
             color: #fff;
+            border-left: 4px solid #ff8f00; /* Vincent’s standout border */
+            box-shadow: 0 2px 8px rgba(255, 143, 0, 0.3); /* Subtle glow */
+            font-size: 1.1rem; /* Slightly larger text */
+            font-weight: 500; /* Bolder for emphasis */
         }
         .chat-input {
             padding: 15px 20px;
@@ -148,7 +152,12 @@
             }
             .chat-header h1 { font-size: 1.5rem; }
             #chatbox { padding: 15px; }
-            .message { font-size: 0.95rem; padding: 10px 14px; }
+            .message { 
+                font-size: 0.95rem; 
+                padding: 10px 14px; 
+                max-width: 95%; /* Even wider on mobile */
+            }
+            .message:not(.user) { font-size: 1.05rem; } /* Adjust Vincent’s text */
             .chat-input {
                 padding: 10px;
                 flex-direction: column;
