@@ -6,7 +6,6 @@
     <title>Vincent - Connecticut Guide</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
     <div class="chat-container">
@@ -16,12 +15,11 @@
         </header>
         <div class="message-list" id="chatbox">
             <div class="message bot">
-                <div class="message-content">Hello! I’m Vincent, your Connecticut guide. How can I help you today?</div>
+                <div class="message-content">Hello! I’m Vincent, your Connecticut guide. Ask me anything!</div>
             </div>
         </div>
         <form id="chat-form" class="chat-input">
-            <textarea id="user-input" placeholder="Ask me anything..." rows="1" autocomplete="off"></textarea>
-            <div class="cf-turnstile" data-sitekey="0x4AAAAAAA_CsY1Tr0uuxaor" data-callback="onTurnstileSuccess"></div>
+            <textarea id="user-input" placeholder="Type your message..." rows="1" autocomplete="off"></textarea>
             <button type="submit" class="send-button">Send</button>
         </form>
     </div>
