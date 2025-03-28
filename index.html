@@ -25,7 +25,7 @@
             border-radius: 20px;
             width: 100%;
             max-width: 800px;
-            height: 90vh; /* Taller on desktop */
+            height: 90vh;
             max-height: 900px;
             display: flex;
             flex-direction: column;
@@ -103,22 +103,22 @@
         }
         .chat-input {
             padding: 15px 20px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(10px);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px; /* Increased gap for breathing room */
         }
         #user-input {
             flex: 1;
             padding: 12px 15px;
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.5);
             color: #fff;
             border: none;
             border-radius: 10px;
             font-family: 'Inter', sans-serif;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             outline: none;
             resize: none;
             min-height: 48px;
@@ -152,32 +152,15 @@
             transform: none;
             box-shadow: none;
         }
-        #speech-button {
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        #speech-button:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        #speech-button.active {
-            background: #ff8f00;
-            color: #000;
-        }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
         @media (max-width: 600px) {
-            body { padding: 0; } /* Full-screen */
+            body { padding: 0; }
             .chat-container {
-                height: 100vh; /* 100% height on mobile */
-                border-radius: 0; /* Edge-to-edge */
+                height: 100vh;
+                border-radius: 0;
             }
             .chat-header h1 { font-size: 1.5rem; }
             .return-button { font-size: 0.85rem; padding: 6px 12px; }
@@ -190,6 +173,7 @@
             .chat-input {
                 padding: 10px;
                 flex-direction: column;
+                gap: 10px; /* Adjusted for mobile */
             }
             #user-input {
                 width: 100%;
@@ -201,11 +185,6 @@
                 width: 100%;
                 padding: 14px;
                 font-size: 1.4rem;
-            }
-            #speech-button {
-                width: 100%;
-                padding: 12px;
-                font-size: 1.1rem;
             }
         }
     </style>
@@ -220,8 +199,7 @@
             <div class="message">Hi! I’m your Mainstreet AI Guide. Ask me something!</div>
         </div>
         <div class="chat-input">
-            <textarea id="user-input" placeholder="Type or speak your question..."></textarea>
-            <button id="speech-button">🎙️</button>
+            <textarea id="user-input" placeholder="Type your question..."></textarea>
             <button id="send-button">Ask</button>
         </div>
     </div>
@@ -298,50 +276,6 @@
             }
         }
 
-        // Speech Recognition
-        const speechButton = document.getElementById('speech-button');
-        const input = document.getElementById('user-input');
-        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'en-US';
-
-            speechButton.addEventListener('click', () => {
-                console.log('Speech button clicked');
-                try {
-                    speechButton.classList.add('active');
-                    recognition.start();
-                } catch (e) {
-                    console.error('Speech start error:', e);
-                    speechButton.classList.remove('active');
-                    addMessage('', 'Mainstreet AI Guide: Speech not supported - please type your question.');
-                }
-            });
-
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                console.log('Speech recognized:', transcript);
-                input.value = transcript;
-                speechButton.classList.remove('active');
-            };
-
-            recognition.onerror = (event) => {
-                console.error('Speech error:', event.error);
-                speechButton.classList.remove('active');
-                addMessage('', 'Mainstreet AI Guide: Speech error - ' + (event.error === 'not-allowed' ? 'mic access denied, check permissions' : 'try again'));
-            };
-
-            recognition.onend = () => {
-                speechButton.classList.remove('active');
-            };
-        } else {
-            speechButton.style.display = 'none';
-            console.log('Speech recognition not supported');
-            addMessage('', 'Mainstreet AI Guide: Speech input not available on this device - please type your question.');
-        }
-
         console.log('Attaching listeners');
         const button = document.getElementById('send-button');
         button.addEventListener('click', () => {
@@ -349,6 +283,7 @@
             sendMessage();
         });
 
+        const input = document.getElementById('user-input');
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 console.log('Enter pressed');
