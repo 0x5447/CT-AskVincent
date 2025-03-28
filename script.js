@@ -10,13 +10,20 @@ const SUGGESTED_PROMPTS = [
 const form = document.getElementById('chat-form');
 const input = document.getElementById('user-input');
 const chatbox = document.getElementById('chatbox');
-const turnstileWidget = document.querySelector('.cf-turnstile');
-const chatTitle = document.getElementById('chat-title');
+const chatTitle = document.querySelector('.chat-title');
 let chatHistory = [];
 let lastMessageTime = 0;
 const RATE_LIMIT_MS = 3000;
 let isVerified = false;
 let isFirstMessage = true;
+let turnstileToken = null;
+
+// Turnstile callback
+window.onTurnstileSuccess = (token) => {
+    turnstileToken = token;
+    isVerified = true;
+    document.querySelector('.cf-turnstile').style.display = 'none';
+};
 
 if (form && input && chatbox) {
     form.addEventListener('submit', async (e) => {
@@ -45,34 +52,20 @@ if (form && input && chatbox) {
         const loadingMessage = addMessage('bot', '<span class="loading-dots">...</span>', true);
 
         try {
-            let token = null;
-            if (!isVerified) {
-                token = turnstileWidget.getAttribute('data-response') || 
-                        (typeof turnstile !== 'undefined' ? await turnstile.getResponse('.cf-turnstile') : null);
-
-                if (!token) {
-                    throw new Error('Please verify you are human first');
-                }
+            if (!isVerified && !turnstileToken) {
+                throw new Error('Please complete the verification first.');
             }
 
-            const url = isVerified 
-                ? `${WORKER_URL}?query=${encodeURIComponent(userMessage)}` 
-                : `${WORKER_URL}?query=${encodeURIComponent(userMessage)}&cfToken=${encodeURIComponent(token)}`;
+            const url = isVerified
+                ? `${WORKER_URL}?query=${encodeURIComponent(userMessage)}`
+                : `${WORKER_URL}?query=${encodeURIComponent(userMessage)}&cfToken=${encodeURIComponent(turnstileToken)}`;
 
             const response = await fetch(url, {
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 'Content-Type': 'application/json' },
             });
 
             if (!response.ok) {
-                const contentType = response.headers.get('content-type');
-                let errorMessage = 'Unknown error';
-                if (contentType && contentType.includes('application/json')) {
-                    const errorData = await response.json();
-                    errorMessage = errorData.error || `HTTP Error: ${response.status}`;
-                } else {
-                    errorMessage = await response.text() || `HTTP Error: ${response.status}`;
-                }
-                throw new Error(errorMessage);
+                throw new Error(`Server error: ${response.status}`);
             }
 
             const contentType = response.headers.get('content-type');
@@ -104,16 +97,13 @@ if (form && input && chatbox) {
                                 }
                             }
                         } catch (e) {
-                            console.error('Parse error:', e);
+                            console.error('Stream parse error:', e);
                         }
                     }
                 }
 
-                if (!content) {
-                    updateMessage(loadingMessage, '⚠️ No response received');
-                } else {
-                    chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
-                }
+                if (!content) throw new Error('No response received');
+                chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
             } else if (contentType?.includes('application/json')) {
                 const data = await response.json();
                 const content = data.reply || 'No reply provided';
@@ -121,11 +111,6 @@ if (form && input && chatbox) {
                 chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
             } else {
                 throw new Error('Unexpected response format');
-            }
-
-            if (!isVerified && token) {
-                isVerified = true;
-                turnstileWidget.style.display = 'none';
             }
         } catch (error) {
             updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
@@ -142,37 +127,30 @@ if (form && input && chatbox) {
             form.dispatchEvent(new Event('submit'));
         }
     });
+
+    // Auto-resize textarea
+    input.addEventListener('input', () => {
+        input.style.height = 'auto';
+        input.style.height = `${input.scrollHeight}px`;
+    });
 }
 
 // Helper Functions
 function addMessage(sender, text, isHTML = false) {
     const div = document.createElement('div');
     div.className = `message ${sender}`;
-
-    if (sender === 'bot') {
-        const content = document.createElement('div');
-        content.className = 'message-content';
-        if (isHTML) {
-            content.innerHTML = text;
-        } else {
-            content.textContent = text;
-        }
-        div.appendChild(content);
-    } else {
-        if (isHTML) {
-            div.innerHTML = text;
-        } else {
-            div.textContent = text;
-        }
-    }
-
+    const content = document.createElement('div');
+    content.className = 'message-content';
+    if (isHTML) content.innerHTML = text;
+    else content.textContent = text;
+    div.appendChild(content);
     chatbox.appendChild(div);
     chatbox.scrollTop = chatbox.scrollHeight;
     return div;
 }
 
 function updateMessage(element, text) {
-    const content = element.querySelector('.message-content') || element;
+    const content = element.querySelector('.message-content');
     content.innerHTML = formatText(text);
     chatbox.scrollTop = chatbox.scrollHeight;
 }
@@ -188,10 +166,10 @@ function formatText(text) {
     let codeBlockContent = [];
     let blockquoteLines = [];
 
-    for (let i = 0; i < lines.length; i++) {
-        let line = lines[i].trim();
+    for (const line of lines) {
+        const trimmed = line.trim();
 
-        if (line.startsWith('```')) {
+        if (trimmed.startsWith('```')) {
             if (!inCodeBlock) {
                 closePendingElements();
                 inCodeBlock = true;
@@ -207,55 +185,49 @@ function formatText(text) {
             continue;
         }
 
-        if (line.match(/^#{1,3}\s/)) {
+        if (trimmed.match(/^#{1,3}\s/)) {
             closePendingElements();
-            const level = line.match(/^#+/)[0].length;
-            const content = line.replace(/^#+\s/, '');
+            const level = trimmed.match(/^#+/)[0].length;
+            const content = trimmed.replace(/^#+\s/, '');
             html += `<h${level}>${inlineFormat(content)}</h${level}>`;
             continue;
         }
 
-        if (line.match(/^\d+\.\s+/)) {
+        if (trimmed.match(/^\d+\.\s/)) {
             if (!inOrderedList) closePendingElements();
             inOrderedList = true;
-            inUnorderedList = false;
-            listItems.push(`<li>${inlineFormat(line.replace(/^\d+\.\s+/, ''))}</li>`);
+            listItems.push(`<li>${inlineFormat(trimmed.replace(/^\d+\.\s/, ''))}</li>`);
             continue;
         }
 
-        if (line.match(/^[-*]\s+/)) {
+        if (trimmed.match(/^[-*]\s/)) {
             if (!inUnorderedList) closePendingElements();
             inUnorderedList = true;
-            inOrderedList = false;
-            listItems.push(`<li>${inlineFormat(line.replace(/^[-*]\s+/, ''))}</li>`);
+            listItems.push(`<li>${inlineFormat(trimmed.replace(/^[-*]\s/, ''))}</li>`);
             continue;
         }
 
-        if (line.startsWith('>')) {
+        if (trimmed.startsWith('>')) {
             if (!inBlockquote) closePendingElements();
             inBlockquote = true;
-            blockquoteLines.push(inlineFormat(line.replace(/^>\s*/, '')));
+            blockquoteLines.push(inlineFormat(trimmed.replace(/^>\s*/, '')));
             continue;
         }
 
-        if (line && !inOrderedList && !inUnorderedList && !inBlockquote) {
+        if (trimmed) {
             closePendingElements();
-            html += `<p>${inlineFormat(line)}</p>`;
-        } else if (!line && (inOrderedList || inUnorderedList || inBlockquote)) {
-            closePendingElements();
+            html += `<p>${inlineFormat(trimmed)}</p>`;
         }
     }
 
     closePendingElements();
-
     return html || text;
 
     function closePendingElements() {
         if (listItems.length) {
-            html += (inOrderedList ? '<ol>' : '<ul>') + listItems.join('') + (inOrderedList ? '' : '</ul>');
+            html += inOrderedList ? `<ol>${listItems.join('')}</ol>` : `<ul>${listItems.join('')}</ul>`;
             listItems = [];
-            inOrderedList = false;
-            inUnorderedList = false;
+            inOrderedList = inUnorderedList = false;
         }
         if (blockquoteLines.length) {
             html += `<blockquote>${blockquoteLines.join('<br>')}</blockquote>`;
@@ -265,7 +237,12 @@ function formatText(text) {
     }
 
     function inlineFormat(text) {
-        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>\$1</strong>').replace(/__(.*?)__/g, '<strong>\$1</strong>');
-        text = text.replace(/\*(.*?)\*/g, '<em>\$1</em>').replace(/_(.*?)_/g, '<em>\$1</em>');
-        text = text.replace(/`([^`]+)`/g, '<code>\$1</code>');
-        text = text.replace(/(https?:\/\/[^\s]+)/g, '</ol>
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/__(.*?)__/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/_(.*?)_/g, '<em>$1</em>')
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+    }
+}
