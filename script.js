@@ -52,14 +52,16 @@ if (form && input && chatbox) {
                 throw new Error('Please complete the verification first.');
             }
 
-            const url = `${WORKER_URL}?query=${encodeURIComponent(userMessage)}${
-                !isVerified ? `&cfToken=${encodeURIComponent(turnstileToken)}` : ''
-            }`;
-            console.log('Fetching from:', url);
+            const requestBody = {
+                query: userMessage,
+                ...(isVerified ? {} : { cfToken: turnstileToken }),
+            };
+            console.log('Sending request to:', WORKER_URL, 'with body:', requestBody);
 
-            const response = await fetch(url, {
-                method: 'GET', // Assuming GET since it’s a query; adjust if your worker expects POST
+            const response = await fetch(WORKER_URL, {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody),
             });
 
             console.log('Response status:', response.status);
@@ -115,8 +117,10 @@ if (form && input && chatbox) {
             if (!content) throw new Error('Empty response from server');
             chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
         } catch (error) {
-            console.error('Error details:', error);
+            console.error('Fetch error details:', error);
             updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
+            // Mock response for testing
+            // updateMessage(loadingMessage, "Mock response: Hi, I'm Vincent! (API not working)");
         } finally {
             form.querySelector('.send-button').disabled = false;
             input.focus();
