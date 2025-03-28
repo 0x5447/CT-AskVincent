@@ -6,10 +6,11 @@ const form = document.getElementById('chat-form');
 const input = document.getElementById('user-input');
 const chatbox = document.getElementById('chatbox');
 const chatTitle = document.querySelector('.chat-title');
+const turnstileWidget = document.querySelector('.cf-turnstile');
 let chatHistory = [];
 let lastMessageTime = 0;
 const RATE_LIMIT_MS = 3000;
-let isVerified = false;
+let isVerified = false; // Persists across submissions
 let isFirstMessage = true;
 let turnstileToken = null;
 
@@ -18,7 +19,7 @@ window.onTurnstileSuccess = (token) => {
     console.log('Turnstile verified, token:', token);
     turnstileToken = token;
     isVerified = true;
-    document.querySelector('.cf-turnstile').style.display = 'none';
+    turnstileWidget.style.display = 'none'; // Hide permanently after success
 };
 
 if (form && input && chatbox) {
@@ -54,8 +55,11 @@ if (form && input && chatbox) {
 
             const requestBody = {
                 query: userMessage,
-                ...(isVerified ? {} : { cfToken: turnstileToken }),
             };
+            // Only include cfToken on first request
+            if (!isVerified) {
+                requestBody.cfToken = turnstileToken;
+            }
             console.log('Sending request to:', WORKER_URL, 'with body:', requestBody);
 
             const response = await fetch(WORKER_URL, {
@@ -63,7 +67,6 @@ if (form && input && chatbox) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody),
             }).catch(err => {
-                // Catch network-level errors (e.g., DNS failure, timeout)
                 throw new Error(`Network error: ${err.message}`);
             });
 
@@ -109,7 +112,6 @@ if (form && input && chatbox) {
                     }
                 }
             } else {
-                // Fallback for unexpected content types
                 content = await response.text();
                 updateMessage(loadingMessage, content || 'No response received');
             }
@@ -119,6 +121,13 @@ if (form && input && chatbox) {
         } catch (error) {
             console.error('Detailed error:', error);
             updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
+            // Don’t reset Turnstile unless explicitly needed
+            if (error.message.includes('Turnstile')) {
+                isVerified = false;
+                turnstileToken = null;
+                turnstileWidget.style.display = 'block'; // Only reset if Turnstile fails
+                if (typeof turnstile !== 'undefined') turnstile.reset();
+            }
         } finally {
             form.querySelector('.send-button').disabled = false;
             input.focus();
