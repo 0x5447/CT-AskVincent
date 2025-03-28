@@ -14,24 +14,33 @@ function addMessage(sender, text) {
     content.innerHTML = text;
     div.appendChild(content);
     chatbox.appendChild(div);
+    console.log('Message appended to chatbox');
     chatbox.scrollTop = chatbox.scrollHeight;
     return div;
 }
 
 async function sendMessage(userMessage) {
-    console.log('Sending:', userMessage);
-    addMessage('user', userMessage);
-    chatHistory.push({ sender: 'You', message: userMessage, timestamp: new Date().toLocaleString() });
-
-    const loadingMessage = addMessage('bot', 'Thinking...');
-    form.querySelector('.send-button').disabled = true;
-
+    console.log('sendMessage started with:', userMessage);
     try {
+        console.log('Adding user message');
+        addMessage('user', userMessage);
+        console.log('Pushing to chatHistory');
+        chatHistory.push({ sender: 'You', message: userMessage, timestamp: new Date().toLocaleString() });
+
+        console.log('Adding loading message');
+        const loadingMessage = addMessage('bot', 'Thinking...');
+        form.querySelector('.send-button').disabled = true;
+
         const url = `${WORKER_URL}?query=${encodeURIComponent(userMessage)}`;
         console.log('Fetching:', url);
 
-        const response = await fetch(url, { method: 'GET' });
-        console.log('Response status:', response.status);
+        const response = await fetch(url, { method: 'GET' })
+            .catch(err => {
+                console.error('Fetch error:', err);
+                throw new Error(`Fetch failed: ${err.message}`);
+            });
+        console.log('Fetch response received, status:', response.status);
+
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(`Server error: ${response.status} - ${errorText}`);
@@ -48,7 +57,10 @@ async function sendMessage(userMessage) {
 
             while (true) {
                 const { done, value } = await reader.read();
-                if (done) break;
+                if (done) {
+                    console.log('Stream complete');
+                    break;
+                }
                 buffer += decoder.decode(value, { stream: true });
                 const events = buffer.split('\n\n');
                 buffer = events.pop();
@@ -66,15 +78,17 @@ async function sendMessage(userMessage) {
             }
         } else {
             content = await response.text();
+            console.log('Non-stream content:', content);
             loadingMessage.querySelector('.message-content').innerHTML = content || 'No response';
         }
 
         if (!content) throw new Error('No content received');
         chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
     } catch (error) {
-        console.error('Error:', error);
-        loadingMessage.querySelector('.message-content').innerHTML = `⚠️ ${error.message}`;
+        console.error('sendMessage error:', error);
+        addMessage('bot', `⚠️ Error: ${error.message}`);
     } finally {
+        console.log('Re-enabling send button');
         form.querySelector('.send-button').disabled = false;
         input.focus();
     }
@@ -83,16 +97,22 @@ async function sendMessage(userMessage) {
 if (form && input && chatbox) {
     console.log('Chat initialized');
     form.addEventListener('submit', (e) => {
+        console.log('Form submit triggered');
         e.preventDefault();
         const message = input.value.trim();
         if (message) {
+            console.log('Calling sendMessage with:', message);
             sendMessage(message);
+            console.log('Clearing input');
             input.value = '';
+        } else {
+            console.log('Empty message, skipping');
         }
     });
 
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
+            console.log('Enter pressed');
             e.preventDefault();
             form.dispatchEvent(new Event('submit'));
         }
