@@ -6,6 +6,7 @@
     <title>Vincent CT Guide</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
 </head>
 <body>
     <div class="chat-container">
@@ -20,7 +21,8 @@
         </div>
         <form id="chat-form" class="chat-input">
             <textarea id="user-input" placeholder="Type your message..." autocomplete="off"></textarea>
-            <button type="submit" class="send-button">Send</button>
+            <div class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITEKEY"></div>
+            <button type="submit" class="send-button">Ask</button>
         </form>
     </div>
 </body>
