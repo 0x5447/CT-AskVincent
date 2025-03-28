@@ -1,10 +1,5 @@
 const WORKER_URL = 'https://msochat.optimistprojects.workers.dev';
 
-const form = document.getElementById('chat-form');
-const input = document.getElementById('user-input');
-const chatbox = document.getElementById('chatbox');
-let chatHistory = [];
-
 function addMessage(sender, text) {
     console.log(`Adding ${sender} message:`, text);
     const div = document.createElement('div');
@@ -13,9 +8,9 @@ function addMessage(sender, text) {
     content.className = 'message-content';
     content.innerHTML = text;
     div.appendChild(content);
-    chatbox.appendChild(div);
+    document.getElementById('chatbox').appendChild(div);
     console.log('Message appended to chatbox');
-    chatbox.scrollTop = chatbox.scrollHeight;
+    document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
     return div;
 }
 
@@ -25,11 +20,11 @@ async function sendMessage(userMessage) {
         console.log('Adding user message');
         addMessage('user', userMessage);
         console.log('Pushing to chatHistory');
-        chatHistory.push({ sender: 'You', message: userMessage, timestamp: new Date().toLocaleString() });
+        window.chatHistory.push({ sender: 'You', message: userMessage, timestamp: new Date().toLocaleString() });
 
         console.log('Adding loading message');
         const loadingMessage = addMessage('bot', 'Thinking...');
-        form.querySelector('.send-button').disabled = true;
+        document.querySelector('.send-button').disabled = true;
 
         const url = `${WORKER_URL}?query=${encodeURIComponent(userMessage)}`;
         console.log('Fetching:', url);
@@ -83,45 +78,54 @@ async function sendMessage(userMessage) {
         }
 
         if (!content) throw new Error('No content received');
-        chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
+        window.chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
     } catch (error) {
         console.error('sendMessage error:', error);
         addMessage('bot', `⚠️ Error: ${error.message}`);
     } finally {
         console.log('Re-enabling send button');
-        form.querySelector('.send-button').disabled = false;
-        input.focus();
+        document.querySelector('.send-button').disabled = false;
+        document.getElementById('user-input').focus();
     }
 }
 
-if (form && input && chatbox) {
-    console.log('Chat initialized');
-    form.addEventListener('submit', (e) => {
-        console.log('Form submit triggered');
-        e.preventDefault();
-        const message = input.value.trim();
-        if (message) {
-            console.log('Calling sendMessage with:', message);
-            sendMessage(message);
-            console.log('Clearing input');
-            input.value = '';
-        } else {
-            console.log('Empty message, skipping');
-        }
-    });
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('user-input');
+    const chatbox = document.getElementById('chatbox');
 
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            console.log('Enter pressed');
+    if (form && input && chatbox) {
+        console.log('Chat elements found, initializing');
+        window.chatHistory = []; // Global to persist across reloads if needed
+
+        form.addEventListener('submit', (e) => {
+            console.log('Form submit triggered');
             e.preventDefault();
-            form.dispatchEvent(new Event('submit'));
-        }
-    });
+            const message = input.value.trim();
+            if (message) {
+                console.log('Calling sendMessage with:', message);
+                sendMessage(message);
+                console.log('Clearing input');
+                input.value = '';
+            } else {
+                console.log('Empty message, skipping');
+            }
+        });
 
-    input.addEventListener('input', () => {
-        input.style.height = 'auto';
-        input.style.height = `${input.scrollHeight}px`;
-    });
-} else {
-    console.error('Missing chat elements!');
-}
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                console.log('Enter pressed');
+                e.preventDefault();
+                form.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        input.addEventListener('input', () => {
+            input.style.height = 'auto';
+            input.style.height = `${input.scrollHeight}px`;
+        });
+    } else {
+        console.error('Missing chat elements:', { form: !!form, input: !!input, chatbox: !!chatbox });
+    }
+});
