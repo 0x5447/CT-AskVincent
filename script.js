@@ -6,13 +6,22 @@ const chatbox = document.getElementById('chatbox');
 const turnstileWidget = document.querySelector('.cf-turnstile');
 let isVerified = false;
 let chatHistory = [];
+let turnstileToken = null;
+
+// Turnstile callback
+window.onTurnstileSuccess = (token) => {
+    console.log('Turnstile success, token:', token);
+    turnstileToken = token;
+    isVerified = true;
+    if (turnstileWidget) turnstileWidget.style.display = 'none';
+};
 
 function addMessage(sender, text) {
     const div = document.createElement('div');
     div.className = `message ${sender}`;
     const content = document.createElement('div');
     content.className = 'message-content';
-    content.innerHTML = text; // Assuming HTML from worker
+    content.innerHTML = text;
     div.appendChild(content);
     chatbox.appendChild(div);
     chatbox.scrollTop = chatbox.scrollHeight;
@@ -29,19 +38,13 @@ async function sendMessage(userMessage) {
 
     try {
         let url = `${WORKER_URL}?query=${encodeURIComponent(userMessage)}`;
-        if (!isVerified && turnstileWidget) {
-            const token = await new Promise(resolve => {
-                if (typeof turnstile !== 'undefined') {
-                    turnstile.ready(() => {
-                        resolve(turnstile.getResponse('.cf-turnstile'));
-                    });
-                } else {
-                    resolve(null);
-                }
-            });
-            if (!token) throw new Error('Please complete verification');
-            url += `&cfToken=${encodeURIComponent(token)}`;
-            console.log('Using token:', token);
+        if (!isVerified && turnstileToken) {
+            url += `&cfToken=${encodeURIComponent(turnstileToken)}`;
+            console.log('Using token:', turnstileToken);
+        } else if (!isVerified) {
+            console.log('No token yet, attempting without cfToken');
+        } else {
+            console.log('Verified, skipping cfToken');
         }
         console.log('Fetching:', url);
 
@@ -83,14 +86,17 @@ async function sendMessage(userMessage) {
             loadingMessage.querySelector('.message-content').innerHTML = content || 'No response';
         }
 
-        if (!isVerified && turnstileWidget) {
+        if (!isVerified && turnstileToken) {
             isVerified = true;
-            turnstileWidget.style.display = 'none';
+            if (turnstileWidget) turnstileWidget.style.display = 'none';
         }
         chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
     } catch (error) {
         console.error('Error:', error);
         loadingMessage.querySelector('.message-content').innerHTML = `⚠️ ${error.message}`;
+        if (error.message.includes('verification') && turnstileWidget) {
+            turnstileWidget.style.display = 'block'; // Show again if verification fails
+        }
     } finally {
         form.querySelector('.send-button').disabled = false;
         input.focus();
