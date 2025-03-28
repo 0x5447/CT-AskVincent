@@ -3,20 +3,10 @@ const WORKER_URL = 'https://msochat.optimistprojects.workers.dev';
 const form = document.getElementById('chat-form');
 const input = document.getElementById('user-input');
 const chatbox = document.getElementById('chatbox');
-const turnstileWidget = document.querySelector('.cf-turnstile');
-let isVerified = false;
 let chatHistory = [];
-let turnstileToken = null;
-
-// Turnstile callback
-window.onTurnstileSuccess = (token) => {
-    console.log('Turnstile success, token:', token);
-    turnstileToken = token;
-    isVerified = true;
-    if (turnstileWidget) turnstileWidget.style.display = 'none';
-};
 
 function addMessage(sender, text) {
+    console.log(`Adding ${sender} message:`, text);
     const div = document.createElement('div');
     div.className = `message ${sender}`;
     const content = document.createElement('div');
@@ -29,33 +19,28 @@ function addMessage(sender, text) {
 }
 
 async function sendMessage(userMessage) {
-    console.log('Sending message:', userMessage);
+    console.log('Sending:', userMessage);
     addMessage('user', userMessage);
     chatHistory.push({ sender: 'You', message: userMessage, timestamp: new Date().toLocaleString() });
 
-    const loadingMessage = addMessage('bot', '<span class="loading-dots">...</span>');
+    const loadingMessage = addMessage('bot', 'Thinking...');
     form.querySelector('.send-button').disabled = true;
 
     try {
-        let url = `${WORKER_URL}?query=${encodeURIComponent(userMessage)}`;
-        if (!isVerified && turnstileToken) {
-            url += `&cfToken=${encodeURIComponent(turnstileToken)}`;
-            console.log('Using token:', turnstileToken);
-        } else if (!isVerified) {
-            console.log('No token yet, attempting without cfToken');
-        } else {
-            console.log('Verified, skipping cfToken');
-        }
+        const url = `${WORKER_URL}?query=${encodeURIComponent(userMessage)}`;
         console.log('Fetching:', url);
 
         const response = await fetch(url, { method: 'GET' });
+        console.log('Response status:', response.status);
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(`Server error: ${response.status} - ${errorText}`);
         }
 
         const contentType = response.headers.get('content-type');
+        console.log('Content-Type:', contentType);
         let content = '';
+
         if (contentType?.includes('text/event-stream')) {
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
@@ -74,10 +59,8 @@ async function sendMessage(userMessage) {
                     const data = JSON.parse(dataLine.slice(5));
                     if (data.choices?.[0]?.delta?.content) {
                         content += data.choices[0].delta.content;
+                        console.log('Stream chunk:', content);
                         loadingMessage.querySelector('.message-content').innerHTML = content;
-                        if (loadingMessage.querySelector('.loading-dots')) {
-                            loadingMessage.querySelector('.loading-dots').remove();
-                        }
                     }
                 }
             }
@@ -86,17 +69,11 @@ async function sendMessage(userMessage) {
             loadingMessage.querySelector('.message-content').innerHTML = content || 'No response';
         }
 
-        if (!isVerified && turnstileToken) {
-            isVerified = true;
-            if (turnstileWidget) turnstileWidget.style.display = 'none';
-        }
+        if (!content) throw new Error('No content received');
         chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
     } catch (error) {
         console.error('Error:', error);
         loadingMessage.querySelector('.message-content').innerHTML = `⚠️ ${error.message}`;
-        if (error.message.includes('verification') && turnstileWidget) {
-            turnstileWidget.style.display = 'block'; // Show again if verification fails
-        }
     } finally {
         form.querySelector('.send-button').disabled = false;
         input.focus();
@@ -104,6 +81,7 @@ async function sendMessage(userMessage) {
 }
 
 if (form && input && chatbox) {
+    console.log('Chat initialized');
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         const message = input.value.trim();
@@ -125,5 +103,5 @@ if (form && input && chatbox) {
         input.style.height = `${input.scrollHeight}px`;
     });
 } else {
-    console.error('Missing critical elements!');
+    console.error('Missing chat elements!');
 }
