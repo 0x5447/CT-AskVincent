@@ -3,24 +3,15 @@ const WORKER_URL = 'https://msochat.optimistprojects.workers.dev';
 
 // Chat-specific logic
 const form = document.getElementById('chat-form');
-const input = document.getElementById('user-input');
+const input = document.getElementById('user-input'); // Updated to match your current HTML
 const chatbox = document.getElementById('chatbox');
-const chatTitle = document.querySelector('.chat-title');
 const turnstileWidget = document.querySelector('.cf-turnstile');
+const chatTitle = document.querySelector('.chat-title'); // Updated to match current class
 let chatHistory = [];
 let lastMessageTime = 0;
 const RATE_LIMIT_MS = 3000;
-let isVerified = false; // Persists across submissions
+let isVerified = false;
 let isFirstMessage = true;
-let turnstileToken = null;
-
-// Turnstile callback
-window.onTurnstileSuccess = (token) => {
-    console.log('Turnstile verified, token:', token);
-    turnstileToken = token;
-    isVerified = true;
-    turnstileWidget.style.display = 'none'; // Hide permanently after success
-};
 
 if (form && input && chatbox) {
     form.addEventListener('submit', async (e) => {
@@ -39,7 +30,7 @@ if (form && input && chatbox) {
         addMessage('user', userMessage);
         chatHistory.push({ sender: 'You', message: userMessage, timestamp: new Date().toLocaleString() });
         input.value = '';
-        form.querySelector('.send-button').disabled = true;
+        form.querySelector('.send-button').disabled = true; // Updated to match current HTML
 
         if (isFirstMessage && chatTitle) {
             chatTitle.classList.add('hidden');
@@ -49,37 +40,46 @@ if (form && input && chatbox) {
         const loadingMessage = addMessage('bot', '<span class="loading-dots">...</span>', true);
 
         try {
-            if (!isVerified && !turnstileToken) {
-                throw new Error('Please complete the verification first.');
-            }
-
-            const requestBody = {
-                query: userMessage,
-            };
-            // Only include cfToken on first request
+            let token = null;
             if (!isVerified) {
-                requestBody.cfToken = turnstileToken;
-            }
-            console.log('Sending request to:', WORKER_URL, 'with body:', requestBody);
+                // Try getting token from widget or Turnstile API
+                token = turnstileWidget.getAttribute('data-response') || 
+                        (typeof turnstile !== 'undefined' ? await turnstile.getResponse('.cf-turnstile') : null);
 
-            const response = await fetch(WORKER_URL, {
-                method: 'POST',
+                if (!token) {
+                    throw new Error('Please verify you are human first');
+                }
+                console.log('Turnstile token:', token);
+            }
+
+            const url = isVerified 
+                ? `${WORKER_URL}?query=${encodeURIComponent(userMessage)}`
+                : `${WORKER_URL}?query=${encodeURIComponent(userMessage)}&cfToken=${encodeURIComponent(token)}`;
+            console.log('Fetching from:', url);
+
+            const response = await fetch(url, {
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody),
             }).catch(err => {
                 throw new Error(`Network error: ${err.message}`);
             });
 
             console.log('Response status:', response.status, 'OK:', response.ok);
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: 'Unknown server error' }));
-                throw new Error(`Server error: ${response.status} - ${errorData.error || 'No details provided'}`);
+                const contentType = response.headers.get('content-type');
+                let errorMessage = 'Unknown error';
+                if (contentType && contentType.includes('application/json')) {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || `HTTP Error: ${response.status}`;
+                } else {
+                    errorMessage = await response.text() || `HTTP Error: ${response.status}`;
+                }
+                throw new Error(errorMessage);
             }
 
             const contentType = response.headers.get('content-type');
             console.log('Content-Type:', contentType);
-
             let content = '';
+
             if (contentType?.includes('text/event-stream')) {
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
@@ -101,33 +101,39 @@ if (form && input && chatbox) {
                             const data = JSON.parse(dataLine.slice(5));
                             if (data.choices?.[0]?.delta?.content) {
                                 content += data.choices[0].delta.content;
-                                updateMessage(loadingMessage, content);
-                                if (loadingMessage.querySelector('.loading-dots')) {
+                                updateMessage(loadingMessage, content); // Simplified to raw text for now
+                                if (content && loadingMessage.querySelector('.loading-dots')) {
                                     loadingMessage.querySelector('.loading-dots').remove();
                                 }
                             }
                         } catch (e) {
-                            console.error('Stream parse error:', e);
+                            console.error('Parse error:', e);
                         }
                     }
                 }
+
+                if (!content) {
+                    updateMessage(loadingMessage, '⚠️ No response received');
+                } else {
+                    chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
+                }
+            } else if (contentType?.includes('application/json')) {
+                const data = await response.json();
+                content = data.reply || 'No reply provided';
+                updateMessage(loadingMessage, content);
+                chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
             } else {
                 content = await response.text();
-                updateMessage(loadingMessage, content || 'No response received');
+                updateMessage(loadingMessage, content || 'Unexpected response format');
             }
 
-            if (!content) throw new Error('Empty response from server');
-            chatHistory.push({ sender: 'Vincent', message: content, timestamp: new Date().toLocaleString() });
-        } catch (error) {
-            console.error('Detailed error:', error);
-            updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
-            // Don’t reset Turnstile unless explicitly needed
-            if (error.message.includes('Turnstile')) {
-                isVerified = false;
-                turnstileToken = null;
-                turnstileWidget.style.display = 'block'; // Only reset if Turnstile fails
-                if (typeof turnstile !== 'undefined') turnstile.reset();
+            if (!isVerified && token) {
+                isVerified = true;
+                turnstileWidget.style.display = 'none'; // Hide after first successful verification
             }
+        } catch (error) {
+            console.error('Submission error:', error);
+            updateMessage(loadingMessage, `⚠️ Error: ${error.message}`);
         } finally {
             form.querySelector('.send-button').disabled = false;
             input.focus();
@@ -164,6 +170,6 @@ function addMessage(sender, text, isHTML = false) {
 
 function updateMessage(element, text) {
     const content = element.querySelector('.message-content');
-    content.innerHTML = text;
+    content.innerHTML = text; // Simplified to raw text for now
     chatbox.scrollTop = chatbox.scrollHeight;
 }
